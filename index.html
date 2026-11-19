@@ -20,7 +20,7 @@ main{padding-bottom:88px}.page{display:none}.page.active{display:block}.avatar{w
 <main class="wrap">
 <div id="homePage" class="page active">
 <section class="hero"><div class="eyebrow" id="eyebrow">AI • VIDEO • PHOTO</div><h1 id="headline">Create. Share. Stream.</h1><p id="intro">Your space for AI conversations, photos and high-quality video streaming—in one place.</p><div class="row"><button class="btn primary" onclick="document.getElementById('upload').scrollIntoView({behavior:'smooth'})" id="uploadCta">Upload media</button><button class="btn secondary" onclick="document.getElementById('assistant').scrollIntoView({behavior:'smooth'})" id="aiCta">Talk to AI</button></div></section>
-<section id="upload"><h2 id="uploadTitle">Upload photos & videos</h2><div class="panel"><div class="grid"><div class="field"><label for="mediaFiles" id="chooseLabel">Choose photos or videos</label><input id="mediaFiles" type="file" accept="image/*,video/*" multiple></div><div class="field"><label for="visibility" id="visibilityLabel">Who can see this?</label><select id="visibility"><option value="public">Public — everyone</option><option value="private">Private — only me</option></select></div></div><div class="row"><button class="btn primary" id="previewBtn">Preview selected media</button><span class="muted" id="visibilityHint">You can choose Public or Private for each upload.</span></div><div class="preview" id="preview"></div><div class="notice" id="uploadNotice">Preview only: files are not uploaded or saved online yet. Secure accounts and cloud storage are the next setup step.</div></div></section>
+<section id="upload"><h2 id="uploadTitle">Upload photos & videos</h2><div class="panel"><div class="grid"><div class="field"><label for="mediaFiles" id="chooseLabel">Choose photos or videos</label><input id="mediaFiles" type="file" accept="image/*,video/*" multiple></div><div class="field"><label for="visibility" id="visibilityLabel">Who can see this?</label><select id="visibility"><option value="public">Public — everyone</option><option value="private">Private — only me</option></select></div></div><div class="row"><button class="btn secondary" id="previewBtn">Preview selected media</button><button class="btn primary" id="uploadMediaBtn" type="button">Upload selected files</button><span class="muted" id="visibilityHint">You can choose Public or Private for each upload.</span></div><div class="preview" id="preview"></div><div class="notice" id="uploadNotice">Choose files and upload them securely to your private Vexora storage. Maximum 100 MB per file.</div></div></section>
 <section id="assistant"><h2 id="aiTitle">Vexora AI Assistant</h2><div class="panel"><div class="chatlog" id="chatlog">नमस्ते! Hello! Vexora AI chat interface preview. AI service will be connected securely in a later step.</div><div class="voice-controls"><label>AI voice language<select id="voiceLanguage"><option value="auto">Auto detect / स्वतः पहचानें</option><option>English</option><option>हिन्दी</option><option>বাংলা</option><option>اردو</option><option>தமிழ்</option><option>తెలుగు</option><option>मराठी</option><option>ગુજરાતી</option><option>ಕನ್ನಡ</option><option>മലയാളം</option><option>ਪੰਜਾਬੀ</option><option>ଓଡ଼ିଆ</option><option>অসমীয়া</option><option>नेपाली</option><option>Français</option><option>Español</option><option>Deutsch</option><option>العربية</option><option>中文</option><option>日本語</option><option>한국어</option><option>Português</option><option>Русский</option><option>Italiano</option><option>Türkçe</option></select></label><label>Voice type<select id="voiceGender"><option value="female">Female voice / महिला आवाज़</option><option value="male">Male voice / पुरुष आवाज़</option></select></label></div><div class="chatrow"><input id="question" placeholder="अपना सवाल लिखें / Ask a question"><button class="btn primary" id="sendBtn">Send</button><button class="btn secondary" id="voiceBtn" type="button">🎙️ Speak</button></div><div class="notice" id="aiNotice">AI text and voice replies are not connected yet. The language and voice selectors are preferences only; actual availability depends on the selected speech provider. Your API key must be stored securely on the server, never in this page.</div></div></section>
 <section><h2 id="privacyTitle">Your privacy choices</h2><div class="grid"><div class="panel"><strong>🌍 Public</strong><p class="muted" id="publicDesc">Approved media can be discovered and watched by everyone.</p></div><div class="panel"><strong>🔒 Private</strong><p class="muted" id="privateDesc">Media is visible only to its owner after sign-in is implemented.</p></div></div></section>
 </div>
@@ -100,6 +100,30 @@ el('loginBtn').addEventListener('click',async()=>{
  if(!currentUser){openAuth();return;}
  const {error}=await supabase.auth.signOut();if(error){alert(error.message);return;}
  currentUser=null;el('loginBtn').textContent='Login';el('profileName').value='';el('profileBio').value='';el('profileNamePreview').textContent='Vexora User';el('avatarPreview').textContent='V';
+});
+el('uploadMediaBtn').addEventListener('click',async()=>{
+ const files=Array.from(el('mediaFiles').files||[]);
+ const notice=el('uploadNotice');
+ if(!currentUser){openAuth();authMessage('Please log in before uploading.');return;}
+ if(!files.length){notice.textContent='पहले एक photo या video चुनें।';return;}
+ const allowed=/^(image\\/(jpeg|png|webp|gif)|video\\/(mp4|webm|quicktime))$/;
+ for(const file of files){if(!allowed.test(file.type)){notice.textContent='यह file type supported नहीं है: '+file.name;return;}if(file.size>100*1024*1024){notice.textContent=file.name+' 100 MB से बड़ी है।';return;}}
+ const button=el('uploadMediaBtn');button.disabled=true;
+ let done=0,errors=[];
+ for(const file of files){
+  const safeName=file.name.replace(/[^a-zA-Z0-9._-]/g,'_');
+  const path=currentUser.id+'/'+Date.now()+'_'+Math.random().toString(36).slice(2)+'_'+safeName;
+  try{
+   const {error:uploadError}=await supabase.storage.from('vexora-videos').upload(path,file,{contentType:file.type,upsert:false});
+   if(uploadError)throw uploadError;
+   const {error:rowError}=await supabase.from('videos').insert({uploader_id:currentUser.id,title:file.name,description:'',storage_path:path,status:'pending',visibility:'private',performer_age_verified:false,consent_verified:false});
+   if(rowError){await supabase.storage.from('vexora-videos').remove([path]);throw rowError;}
+   done++;
+  }catch(e){errors.push(file.name+': '+(e.message||'Upload failed'));}
+  notice.textContent='Uploaded '+done+' of '+files.length+' file(s)...';
+ }
+ notice.textContent=done+' file(s) securely uploaded to private storage.'+(errors.length?' Errors: '+errors.join(' | '):' Files are private and pending review.');
+ button.disabled=false;
 });
 el('saveProfile').addEventListener('click',async()=>{
  if(!currentUser){openAuth();authMessage('Please log in to save your profile.');return;}
