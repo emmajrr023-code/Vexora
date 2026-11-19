@@ -1,128 +1,27 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#101014">
-  <title>VEXORA — Discover What's Next</title>
-  <style>
-    :root{color-scheme:dark;--bg:#101014;--panel:#19191f;--panel2:#24242d;--text:#f7f7fb;--muted:#a5a5b2;--accent:#ff3158;--line:#30303a}
-    *{box-sizing:border-box}
-    body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 Arial,sans-serif}
-    button,input{font:inherit}
-    button{cursor:pointer}
-    .topbar{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:18px;padding:14px 5%;background:#19191fee;border-bottom:1px solid var(--line);backdrop-filter:blur(12px)}
-    .logo{font-size:25px;font-weight:900;letter-spacing:2px;color:var(--accent);text-decoration:none}
-    .search{flex:1;max-width:560px;margin:auto;background:var(--panel2);border:1px solid transparent;border-radius:10px;padding:12px 15px;color:white;outline:none}
-    .search:focus{border-color:var(--accent)}
-    .btn{border:0;border-radius:9px;padding:11px 16px;font-weight:700}
-    .primary{background:var(--accent);color:white}
-    .secondary{background:var(--panel2);color:white}
-    .wrap{width:min(1180px,90%);margin:auto}
-    .hero{margin:28px auto 20px;padding:clamp(28px,6vw,58px);border:1px solid #54233a;border-radius:18px;background:radial-gradient(circle at 85% 15%,#63304d 0,transparent 34%),linear-gradient(120deg,#351326,#211c35 70%)}
-    .eyebrow{color:#ff9caf;text-transform:uppercase;letter-spacing:2px;font-size:12px;font-weight:700}
-    h1{font-size:clamp(34px,6vw,58px);line-height:1.05;margin:12px 0}
-    .hero p{max-width:560px;color:#dedbe4;font-size:17px}
-    .hero-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}
-    .nav{display:flex;gap:9px;overflow:auto;padding:12px 0 18px}
-    .nav button{white-space:nowrap;background:var(--panel2);color:#ddd;border:1px solid var(--line);border-radius:999px;padding:9px 16px}
-    .nav button.active,.nav button:hover{background:var(--accent);border-color:var(--accent);color:white}
-    section{margin:28px 0 38px}
-    .section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:15px}
-    h2{font-size:22px;margin:0}
-    .muted{color:var(--muted)}
-    .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
-    .tile{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden}
-    .thumb{aspect-ratio:16/9;display:grid;place-items:center;background:linear-gradient(135deg,#42203a,#292940);font-size:38px}
-    .tile-body{padding:14px}
-    .tile h3{margin:0 0 5px;font-size:16px}
-    .tile p{margin:0;color:var(--muted);font-size:13px}
-    .category{display:flex;align-items:center;gap:12px;padding:17px;background:var(--panel);border:1px solid var(--line);border-radius:12px}
-    .category span{font-size:25px}
-    .empty{padding:35px 18px;text-align:center;background:var(--panel);border:1px dashed #454550;border-radius:14px;color:var(--muted)}
-    .empty strong{display:block;color:white;font-size:17px;margin-bottom:5px}
-    footer{border-top:1px solid var(--line);padding:28px 5%;text-align:center;color:var(--muted);font-size:13px}
-    footer a{color:#ddd;margin:0 7px}
-    .notice{margin-top:12px;color:#ffc2ce;font-size:13px}
-    @media(max-width:760px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.topbar{gap:10px;padding:12px 5%}.logo{font-size:20px}.login{padding:10px 12px}}
-    @media(max-width:480px){.grid{grid-template-columns:1fr}.hero{margin-top:16px}.search{min-width:0;padding:10px}.topbar{gap:8px}}
-  </style>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#101014">
+<title>VEXORA — AI & Media</title>
+<style>
+:root{color-scheme:dark;--bg:#101014;--panel:#1b1b23;--muted:#aaaaba;--line:#343440;--accent:#ff3158}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:#f7f7fb;font:15px/1.5 Arial,sans-serif}button,input,select{font:inherit}button{cursor:pointer}.wrap{width:min(1100px,92%);margin:auto}.top{display:flex;align-items:center;gap:14px;padding:16px 4%;border-bottom:1px solid var(--line);position:sticky;top:0;background:#15151eee;z-index:2}.logo{font-weight:900;letter-spacing:2px;font-size:24px;color:var(--accent)}.spacer{flex:1}.btn{border:0;border-radius:9px;padding:11px 16px;font-weight:700}.primary{background:var(--accent);color:white}.secondary{background:#30303b;color:white}.hero{margin:28px 0;padding:clamp(25px,6vw,54px);border:1px solid #633044;border-radius:18px;background:radial-gradient(circle at 85% 15%,#63304d,transparent 35%),linear-gradient(120deg,#351326,#211c35)}.eyebrow{color:#ffadbd;letter-spacing:2px;text-transform:uppercase;font-size:12px}h1{font-size:clamp(35px,7vw,58px);line-height:1.05;margin:12px 0}.hero p{max-width:650px;color:#e1dce5;font-size:17px}.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}section{margin:30px 0}h2{font-size:22px;margin:0 0 14px}.muted{color:var(--muted)}.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.field{display:grid;gap:7px;margin:12px 0}.field input,.field select{width:100%;background:#292933;color:white;border:1px solid #454552;border-radius:9px;padding:12px}.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}.tabs button{background:#292933;color:white;border:1px solid var(--line);border-radius:99px;padding:9px 15px}.tabs button.active{background:var(--accent)}.preview{margin-top:15px;display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}.preview img,.preview video{width:100%;max-height:220px;object-fit:contain;background:#09090c;border-radius:9px}.notice{font-size:13px;color:#ffc2ce;margin-top:12px}.chatlog{min-height:90px;padding:14px;background:#111117;border:1px solid var(--line);border-radius:10px;color:var(--muted);margin-bottom:12px;white-space:pre-wrap}.chatrow{display:flex;gap:8px}.chatrow input{min-width:0;flex:1;background:#292933;color:white;border:1px solid #454552;border-radius:9px;padding:12px}footer{text-align:center;border-top:1px solid var(--line);padding:26px;color:var(--muted);margin-top:45px}@media(max-width:650px){.grid{grid-template-columns:1fr}.top{padding:12px 4%}.logo{font-size:20px}}
+</style>
 </head>
 <body>
-  <header class="topbar">
-    <a class="logo" href="#" aria-label="VEXORA home">VEXORA</a>
-    <input id="search" class="search" type="search" placeholder="Search videos or categories..." aria-label="Search videos">
-    <button class="btn primary login" id="loginBtn">Login</button>
-  </header>
-
-  <main class="wrap">
-    <section class="hero">
-      <div class="eyebrow">Your next favorite video starts here</div>
-      <h1>Discover What's Next.</h1>
-      <p>Watch, explore and share videos with VEXORA. Find fresh ideas, creators and entertainment in one place.</p>
-      <div class="hero-actions">
-        <button class="btn primary" id="exploreBtn">Explore videos</button>
-        <button class="btn secondary" id="uploadBtn">Upload video</button>
-      </div>
-      <div class="notice" id="notice" role="status">Preview mode — accounts and uploads will be enabled after secure backend setup.</div>
-    </section>
-
-    <nav class="nav" aria-label="Video sections">
-      <button class="active" data-target="trending">Trending</button>
-      <button data-target="latest">Latest</button>
-      <button data-target="popular">Popular</button>
-      <button data-target="categories">Categories</button>
-    </nav>
-
-    <section id="trending">
-      <div class="section-head"><h2>🔥 Trending videos</h2><span class="muted">Community picks</span></div>
-      <div class="empty"><strong>No videos yet</strong>Videos will appear here after admin approval.</div>
-    </section>
-
-    <section id="latest">
-      <div class="section-head"><h2>🆕 Latest videos</h2></div>
-      <div class="empty"><strong>Be the first to share</strong>Newly approved videos will show up here.</div>
-    </section>
-
-    <section id="popular">
-      <div class="section-head"><h2>⭐ Popular videos</h2></div>
-      <div class="empty"><strong>Coming soon</strong>Popular videos will be ranked using real viewing activity.</div>
-    </section>
-
-    <section id="categories">
-      <div class="section-head"><h2>🎬 Explore categories</h2></div>
-      <div class="grid">
-        <div class="category"><span>🎮</span><div><strong>Gaming</strong><div class="muted">Gameplay and streams</div></div></div>
-        <div class="category"><span>🎵</span><div><strong>Music</strong><div class="muted">Songs and performances</div></div></div>
-        <div class="category"><span>🎥</span><div><strong>Entertainment</strong><div class="muted">Shows and creators</div></div></div>
-        <div class="category"><span>📚</span><div><strong>Education</strong><div class="muted">Learn something new</div></div></div>
-        <div class="category"><span>⚽</span><div><strong>Sports</strong><div class="muted">Highlights and action</div></div></div>
-        <div class="category"><span>💻</span><div><strong>Technology</strong><div class="muted">Tech and innovation</div></div></div>
-      </div>
-    </section>
-  </main>
-
-  <footer>
-    VEXORA © 2026 · All Rights Reserved<br><br>
-    <a href="#terms">Terms</a><a href="#privacy">Privacy</a><a href="mailto:support@vexora.example?subject=VEXORA%20Report">Report</a>
-    <div class="muted" style="margin-top:10px">Please follow the platform rules and applicable age requirements.</div>
-  </footer>
-
-  <script>
-    const notice = document.getElementById('notice');
-    document.getElementById('exploreBtn').addEventListener('click', () => document.getElementById('trending').scrollIntoView({behavior:'smooth'}));
-    document.getElementById('uploadBtn').addEventListener('click', () => { notice.textContent = 'Video uploads are not connected yet. Secure sign-in and storage will be added in the next development step.'; });
-    document.getElementById('loginBtn').addEventListener('click', () => { window.location.href = 'login.html'; });
-    document.querySelectorAll('.nav button').forEach(button => button.addEventListener('click', () => {
-      document.querySelectorAll('.nav button').forEach(item => item.classList.remove('active'));
-      button.classList.add('active');
-      document.getElementById(button.dataset.target).scrollIntoView({behavior:'smooth'});
-    }));
-    document.getElementById('search').addEventListener('input', event => {
-      const query = event.target.value.trim().toLowerCase();
-      document.querySelectorAll('.category').forEach(card => { card.hidden = query && !card.textContent.toLowerCase().includes(query); });
-      document.getElementById('categories').querySelector('.section-head h2').textContent = query ? 'Search categories' : '🎬 Explore categories';
-    });
-  </script>
-</body>
-</html>
+<header class="top"><div class="logo">VEXORA</div><div class="spacer"></div><button class="btn secondary" id="langBtn">हिंदी</button><button class="btn primary" id="loginBtn">Login</button></header>
+<main class="wrap">
+<section class="hero"><div class="eyebrow" id="eyebrow">AI • VIDEO • PHOTO</div><h1 id="headline">Create. Share. Stream.</h1><p id="intro">Your space for AI conversations, photos and high-quality video streaming—in one place.</p><div class="row"><button class="btn primary" onclick="document.getElementById('upload').scrollIntoView({behavior:'smooth'})" id="uploadCta">Upload media</button><button class="btn secondary" onclick="document.getElementById('assistant').scrollIntoView({behavior:'smooth'})" id="aiCta">Talk to AI</button></div></section>
+<section id="upload"><h2 id="uploadTitle">Upload photos & videos</h2><div class="panel"><div class="grid"><div class="field"><label for="mediaFiles" id="chooseLabel">Choose photos or videos</label><input id="mediaFiles" type="file" accept="image/*,video/*" multiple></div><div class="field"><label for="visibility" id="visibilityLabel">Who can see this?</label><select id="visibility"><option value="public">Public — everyone</option><option value="private">Private — only me</option></select></div></div><div class="row"><button class="btn primary" id="previewBtn">Preview selected media</button><span class="muted" id="visibilityHint">You can choose Public or Private for each upload.</span></div><div class="preview" id="preview"></div><div class="notice" id="uploadNotice">Preview only: files are not uploaded or saved online yet. Secure accounts and cloud storage are the next setup step.</div></div></section>
+<section id="assistant"><h2 id="aiTitle">Vexora AI Assistant</h2><div class="panel"><div class="chatlog" id="chatlog">नमस्ते! Hello! Vexora AI chat interface preview. AI service will be connected securely in a later step.</div><div class="chatrow"><input id="question" placeholder="अपना सवाल लिखें / Ask a question"><button class="btn primary" id="sendBtn">Send</button></div><div class="notice" id="aiNotice">AI replies are not connected yet. Your API key must be stored securely on the server, never in this page.</div></div></section>
+<section><h2 id="privacyTitle">Your privacy choices</h2><div class="grid"><div class="panel"><strong>🌍 Public</strong><p class="muted" id="publicDesc">Approved media can be discovered and watched by everyone.</p></div><div class="panel"><strong>🔒 Private</strong><p class="muted" id="privateDesc">Media is visible only to its owner after sign-in is implemented.</p></div></div></section>
+</main><footer>VEXORA © 2026 · AI and media platform</footer>
+<script>
+const $=id=>document.getElementById(id);let hindi=false;let objectUrls=[];
+$('langBtn').addEventListener('click',()=>{hindi=!hindi;$('langBtn').textContent=hindi?'English':'हिंदी';$('headline').textContent=hindi?'बनाएँ। साझा करें। स्ट्रीम करें।':'Create. Share. Stream.';$('intro').textContent=hindi?'AI बातचीत, फोटो और उच्च गुणवत्ता वाली वीडियो स्ट्रीमिंग—सब एक जगह।':'Your space for AI conversations, photos and high-quality video streaming—in one place.';$('uploadTitle').textContent=hindi?'फोटो और वीडियो अपलोड करें':'Upload photos & videos';$('chooseLabel').textContent=hindi?'फोटो या वीडियो चुनें':'Choose photos or videos';$('visibilityLabel').textContent=hindi?'कौन देख सकता है?':'Who can see this?';$('visibilityHint').textContent=hindi?'हर अपलोड के लिए Public या Private चुनें।':'You can choose Public or Private for each upload.';$('previewBtn').textContent=hindi?'चुनी हुई फाइलें देखें':'Preview selected media';$('aiTitle').textContent=hindi?'Vexora AI सहायक':'Vexora AI Assistant';$('privacyTitle').textContent=hindi?'आपकी प्राइवेसी':'Your privacy choices';$('publicDesc').textContent=hindi?'मंज़ूर की गई मीडिया सभी लोग देख सकते हैं।':'Approved media can be discovered and watched by everyone.';$('privateDesc').textContent=hindi?'साइन-इन के बाद मीडिया सिर्फ़ उसका मालिक देख सकेगा।':'Media is visible only to its owner after sign-in is implemented.';$('question').placeholder=hindi?'अपना सवाल लिखें':'Ask a question';$('sendBtn').textContent=hindi?'भेजें':'Send';$('uploadNotice').textContent=hindi?'अभी यह सिर्फ़ प्रीव्यू है—फाइलें ऑनलाइन अपलोड या सेव नहीं होतीं। अगला कदम सुरक्षित अकाउंट और क्लाउड स्टोरेज है।':'Preview only: files are not uploaded or saved online yet. Secure accounts and cloud storage are the next setup step.';});
+$('previewBtn').addEventListener('click',()=>{objectUrls.forEach(URL.revokeObjectURL);objectUrls=[];$('preview').replaceChildren();const files=[...$('mediaFiles').files];if(!files.length){$('uploadNotice').textContent=hindi?'पहले फोटो या वीडियो चुनें।':'Choose photos or videos first.';return;}for(const file of files){const url=URL.createObjectURL(file);objectUrls.push(url);const el=file.type.startsWith('video/')?document.createElement('video'):document.createElement('img');el.src=url;if(el.tagName==='VIDEO'){el.controls=true;el.setAttribute('controlsList','nodownload');el.setAttribute('disablePictureInPicture','');}el.alt=file.name;const box=document.createElement('div');box.append(el);const caption=document.createElement('small');caption.textContent=file.name+' · '+$('visibility').value;box.append(caption);$('preview').append(box);} $('uploadNotice').textContent=(hindi?'लोकल प्रीव्यू · दृश्यता: ':'Local preview · Visibility: ')+$('visibility').value+'. '+(hindi?'अभी सर्वर पर अपलोड नहीं हुआ।':'Nothing has been uploaded to a server yet.');});
+$('sendBtn').addEventListener('click',()=>{$('chatlog').textContent=hindi?'AI चैट अभी कनेक्ट नहीं है। सर्वर सेटअप के बाद यह काम करेगा।':'AI chat is not connected yet. It will work after server setup.';});
+$('loginBtn').addEventListener('click',()=>alert(hindi?'लॉगिन सुविधा अगले backend चरण में जोड़ी जाएगी।':'Sign-in will be added in the backend setup step.'));
+</script>
+</body></html>
