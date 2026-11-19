@@ -9,22 +9,20 @@
     :root{color-scheme:dark;--bg:#101014;--panel:#19191f;--panel2:#24242d;--text:#f7f7fb;--muted:#a5a5b2;--accent:#ff3158;--line:#30303a}
     *{box-sizing:border-box}
     body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px;background:radial-gradient(circle at 15% 10%,#3b1b31 0,transparent 35%),radial-gradient(circle at 90% 90%,#24203b 0,transparent 35%),var(--bg);color:var(--text);font:15px/1.5 Arial,sans-serif}
-    a{color:#ff8da2;text-decoration:none}
-    a:hover{text-decoration:underline}
+    a{color:#ff8da2;text-decoration:none}a:hover{text-decoration:underline}
     .card{width:min(100%,430px);padding:clamp(24px,6vw,38px);background:#19191ff2;border:1px solid var(--line);border-radius:20px;box-shadow:0 24px 80px #0008}
     .brand{display:inline-block;margin-bottom:26px;color:var(--accent);font-size:25px;font-weight:900;letter-spacing:2px}
     .eyebrow{color:#ff9caf;text-transform:uppercase;letter-spacing:2px;font-size:11px;font-weight:700}
-    h1{font-size:30px;margin:7px 0 5px}
-    .muted{color:var(--muted);margin:0 0 25px}
+    h1{font-size:30px;margin:7px 0 5px}.muted{color:var(--muted);margin:0 0 25px}
     label{display:block;margin:17px 0 7px;font-weight:700;font-size:13px}
     input{width:100%;padding:13px 14px;border:1px solid #3a3a46;border-radius:10px;background:var(--panel2);color:white;font:inherit;outline:none}
     input:focus{border-color:var(--accent);box-shadow:0 0 0 3px #ff315822}
-    .password-wrap{position:relative}
-    .password-wrap input{padding-right:76px}
+    .password-wrap{position:relative}.password-wrap input{padding-right:76px}
     .toggle{position:absolute;right:9px;top:50%;transform:translateY(-50%);border:0;background:transparent;color:#ff9caf;font-weight:700;cursor:pointer;padding:7px}
     .submit{width:100%;margin-top:23px;padding:14px;border:0;border-radius:10px;background:var(--accent);color:white;font:inherit;font-weight:800;cursor:pointer}
-    .submit:hover{filter:brightness(1.08)}
-    .note{margin-top:15px;padding:11px 12px;border:1px solid #5b4527;border-radius:9px;background:#302719;color:#f4d6a2;font-size:12px}
+    .submit:disabled{opacity:.65;cursor:wait}
+    .status{display:none;margin-top:15px;padding:11px 12px;border:1px solid #3d654e;border-radius:9px;background:#192b21;color:#bce9c9;font-size:13px;overflow-wrap:anywhere}
+    .status.error{border-color:#713849;background:#321b24;color:#ffc2ce}.status.show{display:block}
     .foot{margin-top:23px;text-align:center;color:var(--muted);font-size:13px}
     .back{display:block;margin-top:18px;text-align:center;font-size:13px}
     @media(max-width:420px){body{padding:14px}.card{padding:24px}}
@@ -33,11 +31,11 @@
 <body>
   <main class="card">
     <a class="brand" href="index.html" aria-label="VEXORA home">VEXORA</a>
-    <div class="eyebrow">Welcome back</div>
-    <h1>Log in to VEXORA</h1>
-    <p class="muted">Sign in to continue exploring videos and creators.</p>
+    <div class="eyebrow">Your video community</div>
+    <h1 id="heading">Log in to VEXORA</h1>
+    <p class="muted" id="intro">Sign in to continue exploring videos and creators.</p>
 
-    <form id="loginForm">
+    <form id="authForm">
       <label for="email">Email address</label>
       <input id="email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required>
 
@@ -47,32 +45,94 @@
         <button class="toggle" id="togglePassword" type="button" aria-label="Show password">Show</button>
       </div>
 
-      <button class="submit" type="submit">Log in</button>
+      <button class="submit" id="submitButton" type="submit">Log in</button>
     </form>
 
-    <div class="note" role="status">Preview only: secure login is not connected yet. Do not enter a real password until Supabase Authentication has been configured.</div>
-    <div class="foot">New to VEXORA? <a href="#" id="signupLink">Sign up</a></div>
+    <div class="status" id="status" role="status" aria-live="polite"></div>
+    <div class="foot"><span id="switchText">New to VEXORA?</span> <a href="#" id="switchMode">Create an account</a></div>
     <a class="back" href="index.html">← Back to homepage</a>
   </main>
 
-  <script>
-    const password = document.getElementById('password');
-    const toggle = document.getElementById('togglePassword');
-    toggle.addEventListener('click', () => {
-      const showing = password.type === 'text';
-      password.type = showing ? 'password' : 'text';
-      toggle.textContent = showing ? 'Show' : 'Hide';
-      toggle.setAttribute('aria-label', showing ? 'Show password' : 'Hide password');
+  <script type="module">
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+    const SUPABASE_URL = 'https://retyursehkyhzyyemjyz.supabase.co';
+    const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_0KZ6Xb7FM0RwYebAdUM3Rw_MAbaqiZQ';
+    const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+      auth: { autoRefreshToken: true, persistSession: true, detectSessionInUrl: true }
     });
 
-    document.getElementById('loginForm').addEventListener('submit', event => {
+    const form = document.getElementById('authForm');
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const submitButton = document.getElementById('submitButton');
+    const statusBox = document.getElementById('status');
+    const heading = document.getElementById('heading');
+    const intro = document.getElementById('intro');
+    const switchText = document.getElementById('switchText');
+    const switchMode = document.getElementById('switchMode');
+    let mode = 'login';
+
+    function showStatus(message, isError = false) {
+      statusBox.textContent = message;
+      statusBox.className = 'status show' + (isError ? ' error' : '');
+    }
+
+    switchMode.addEventListener('click', event => {
       event.preventDefault();
-      alert('VEXORA login is not active yet. Supabase Authentication must be connected first. Please do not use a real password on this preview page.');
+      mode = mode === 'login' ? 'signup' : 'login';
+      const signingUp = mode === 'signup';
+      heading.textContent = signingUp ? 'Create your VEXORA account' : 'Log in to VEXORA';
+      intro.textContent = signingUp ? 'Create an account to join the VEXORA community.' : 'Sign in to continue exploring videos and creators.';
+      submitButton.textContent = signingUp ? 'Create account' : 'Log in';
+      switchText.textContent = signingUp ? 'Already have an account?' : 'New to VEXORA?';
+      switchMode.textContent = signingUp ? 'Log in' : 'Create an account';
+      passwordInput.autocomplete = signingUp ? 'new-password' : 'current-password';
+      statusBox.className = 'status';
     });
 
-    document.getElementById('signupLink').addEventListener('click', event => {
+    document.getElementById('togglePassword').addEventListener('click', event => {
+      const showing = passwordInput.type === 'text';
+      passwordInput.type = showing ? 'password' : 'text';
+      event.currentTarget.textContent = showing ? 'Show' : 'Hide';
+      event.currentTarget.setAttribute('aria-label', showing ? 'Show password' : 'Hide password');
+    });
+
+    form.addEventListener('submit', async event => {
       event.preventDefault();
-      alert('VEXORA sign-up will be added with Supabase Authentication.');
+      statusBox.className = 'status';
+      submitButton.disabled = true;
+      submitButton.textContent = mode === 'signup' ? 'Creating account…' : 'Logging in…';
+
+      const email = emailInput.value.trim();
+      const password = passwordInput.value;
+
+      try {
+        if (mode === 'signup') {
+          const { data, error } = await supabase.auth.signUp({ email, password });
+          if (error) throw error;
+          if (data.session) {
+            showStatus('Your VEXORA account is ready. Opening the homepage…');
+            window.location.href = 'index.html';
+          } else {
+            showStatus('Account request received. Check your email for the confirmation link, then return here and log in.');
+          }
+        } else {
+          const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+          if (error) throw error;
+          if (data.session) {
+            showStatus('Login successful. Opening VEXORA…');
+            window.location.href = 'index.html';
+          } else {
+            showStatus('Login could not be completed. Please try again.', true);
+          }
+        }
+      } catch (error) {
+        showStatus(error.message || 'Something went wrong. Please try again.', true);
+      } finally {
+        submitButton.disabled = false;
+        submitButton.textContent = mode === 'signup' ? 'Create account' : 'Log in';
+      }
     });
   </script>
 </body>
