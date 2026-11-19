@@ -121,7 +121,7 @@ el('uploadMediaBtn').addEventListener('click',async()=>{
   try{
    const {error:uploadError}=await supabase.storage.from('vexora-videos').upload(path,file,{contentType:file.type,upsert:false});
    if(uploadError)throw uploadError;
-   const {data:videoRow,error:rowError}=await supabase.from('videos').insert({uploader_id:currentUser.id,title:file.name,description:'',storage_path:path,status:'pending',visibility:'private',performer_age_verified:false,consent_verified:false}).select('id').single();
+   const {data:videoRow,error:rowError}=await supabase.from('videos').insert({uploader_id:currentUser.id,title:file.name,description:'',storage_path:path,status:'pending',visibility:el('visibility').value,performer_age_verified:false,consent_verified:false}).select('id').single();
    if(rowError){await supabase.storage.from('vexora-videos').remove([path]);throw rowError;}
    const {data:moderation,error:moderationError}=await supabase.functions.invoke('moderate-upload',{body:{video_id:videoRow.id}});
    if(moderationError){errors.push(file.name+': uploaded privately; AI moderation failed ('+moderationError.message+').');done++;continue;}
