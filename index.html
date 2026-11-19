@@ -16,7 +16,7 @@ main{padding-bottom:88px}.page{display:none}.page.active{display:block}.avatar{w
 </style>
 </head>
 <body>
-<header class="top"><div class="logo">VEXORA</div><div class="spacer"></div><button class="btn secondary" id="langBtn">हिंदी</button><button class="btn primary" id="loginBtn">Login</button></header>
+<header class="top"><div class="logo">VEXORA</div><div class="spacer"></div><button class="btn secondary" id="langBtn">हिंदी</button><button class="btn primary" id="loginBtn" type="button" onclick="document.getElementById('authModal').style.display='block'">Login</button></header>
 <main class="wrap">
 <div id="homePage" class="page active">
 <section class="hero"><div class="eyebrow" id="eyebrow">AI • VIDEO • PHOTO</div><h1 id="headline">Create. Share. Stream.</h1><p id="intro">Your space for AI conversations, photos and high-quality video streaming—in one place.</p><div class="row"><button class="btn primary" onclick="document.getElementById('upload').scrollIntoView({behavior:'smooth'})" id="uploadCta">Upload media</button><button class="btn secondary" onclick="document.getElementById('assistant').scrollIntoView({behavior:'smooth'})" id="aiCta">Talk to AI</button></div></section>
