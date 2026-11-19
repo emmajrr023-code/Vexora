@@ -112,7 +112,7 @@
     const notice = document.getElementById('notice');
     document.getElementById('exploreBtn').addEventListener('click', () => document.getElementById('trending').scrollIntoView({behavior:'smooth'}));
     document.getElementById('uploadBtn').addEventListener('click', () => { notice.textContent = 'Video uploads are not connected yet. Secure sign-in and storage will be added in the next development step.'; });
-    document.getElementById('loginBtn').addEventListener('click', () => { notice.textContent = 'Login and signup will be enabled after Supabase authentication is configured.'; });
+    document.getElementById('loginBtn').addEventListener('click', () => { window.location.href = 'login.html'; });
     document.querySelectorAll('.nav button').forEach(button => button.addEventListener('click', () => {
       document.querySelectorAll('.nav button').forEach(item => item.classList.remove('active'));
       button.classList.add('active');
