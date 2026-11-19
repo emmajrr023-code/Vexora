@@ -33,18 +33,82 @@ main{padding-bottom:88px}.page{display:none}.page.active{display:block}.avatar{w
 <div class="setting-row"><label for="privacySetting">Default media privacy</label><select id="privacySetting"><option>Private</option><option>Public</option></select></div>
 <p class="notice">These are interface preferences for now. Account sync, full translation, and AI voice output need their backend services.</p></div></section>
 </main>
-<nav class="app-nav" aria-label="Main navigation"><button class="active" data-page="homePage"><span>⌂</span>Home</button><button data-page="profilePage"><span>👤</span>Profile</button><button data-page="uploadsPage"><span>▣</span>Uploads</button><button data-page="settingsPage"><span>⚙</span>Settings</button></nav><footer>VEXORA © 2026 · AI and media platform</footer>
+<nav class="app-nav" aria-label="Main navigation"><button class="active" data-page="homePage"><span>⌂</span>Home</button><button data-page="profilePage"><span>👤</span>Profile</button><button data-page="uploadsPage"><span>▣</span>Uploads</button><button data-page="settingsPage"><span>⚙</span>Settings</button></nav>
+<div id="authModal" style="display:none;position:fixed;inset:0;z-index:30;background:#000b;padding:18px;overflow:auto">
+ <div class="panel" style="max-width:440px;margin:8vh auto">
+  <div class="row" style="justify-content:space-between"><h2 id="authTitle">Vexora Login</h2><button class="btn secondary" id="closeAuth" type="button">✕</button></div>
+  <div class="field"><label for="authEmail">Email</label><input id="authEmail" type="email" autocomplete="email" placeholder="you@example.com"></div>
+  <div class="field"><label for="authPassword">Password</label><input id="authPassword" type="password" autocomplete="current-password" minlength="6" placeholder="At least 6 characters"></div>
+  <div class="field" id="authNameWrap" style="display:none"><label for="authName">Display name</label><input id="authName" autocomplete="name" placeholder="Your name"></div>
+  <p id="authMessage" class="notice" aria-live="polite"></p>
+  <div class="row"><button class="btn primary" id="authSubmit" type="button">Login</button><button class="btn secondary" id="authSwitch" type="button">Create account</button></div>
+ </div>
+</div><footer>VEXORA © 2026 · AI and media platform</footer>
 <script>
 const $=id=>document.getElementById(id);let hindi=false;let objectUrls=[];
 $('langBtn').addEventListener('click',()=>{hindi=!hindi;$('langBtn').textContent=hindi?'English':'हिंदी';$('headline').textContent=hindi?'बनाएँ। साझा करें। स्ट्रीम करें।':'Create. Share. Stream.';$('intro').textContent=hindi?'AI बातचीत, फोटो और उच्च गुणवत्ता वाली वीडियो स्ट्रीमिंग—सब एक जगह।':'Your space for AI conversations, photos and high-quality video streaming—in one place.';$('uploadTitle').textContent=hindi?'फोटो और वीडियो अपलोड करें':'Upload photos & videos';$('chooseLabel').textContent=hindi?'फोटो या वीडियो चुनें':'Choose photos or videos';$('visibilityLabel').textContent=hindi?'कौन देख सकता है?':'Who can see this?';$('visibilityHint').textContent=hindi?'हर अपलोड के लिए Public या Private चुनें।':'You can choose Public or Private for each upload.';$('previewBtn').textContent=hindi?'चुनी हुई फाइलें देखें':'Preview selected media';$('aiTitle').textContent=hindi?'Vexora AI सहायक':'Vexora AI Assistant';$('privacyTitle').textContent=hindi?'आपकी प्राइवेसी':'Your privacy choices';$('publicDesc').textContent=hindi?'मंज़ूर की गई मीडिया सभी लोग देख सकते हैं।':'Approved media can be discovered and watched by everyone.';$('privateDesc').textContent=hindi?'साइन-इन के बाद मीडिया सिर्फ़ उसका मालिक देख सकेगा।':'Media is visible only to its owner after sign-in is implemented.';$('question').placeholder=hindi?'अपना सवाल लिखें':'Ask a question';$('sendBtn').textContent=hindi?'भेजें':'Send';$('uploadNotice').textContent=hindi?'अभी यह सिर्फ़ प्रीव्यू है—फाइलें ऑनलाइन अपलोड या सेव नहीं होतीं। अगला कदम सुरक्षित अकाउंट और क्लाउड स्टोरेज है।':'Preview only: files are not uploaded or saved online yet. Secure accounts and cloud storage are the next setup step.';});
 $('previewBtn').addEventListener('click',()=>{objectUrls.forEach(URL.revokeObjectURL);objectUrls=[];$('preview').replaceChildren();const files=[...$('mediaFiles').files];if(!files.length){$('uploadNotice').textContent=hindi?'पहले फोटो या वीडियो चुनें।':'Choose photos or videos first.';return;}for(const file of files){const url=URL.createObjectURL(file);objectUrls.push(url);const el=file.type.startsWith('video/')?document.createElement('video'):document.createElement('img');el.src=url;if(el.tagName==='VIDEO'){el.controls=true;el.setAttribute('controlsList','nodownload');el.setAttribute('disablePictureInPicture','');}el.alt=file.name;const box=document.createElement('div');box.append(el);const caption=document.createElement('small');caption.textContent=file.name+' · '+$('visibility').value;box.append(caption);$('preview').append(box);} $('uploadNotice').textContent=(hindi?'लोकल प्रीव्यू · दृश्यता: ':'Local preview · Visibility: ')+$('visibility').value+'. '+(hindi?'अभी सर्वर पर अपलोड नहीं हुआ।':'Nothing has been uploaded to a server yet.');});
 $('sendBtn').addEventListener('click',sendMessage);\n$('question').addEventListener('keydown',event=>{if(event.key==='Enter')sendMessage();});\nasync function sendMessage(){const message=$('question').value.trim();if(!message)return;$('chatlog').textContent=(hindi?'आप: ':'You: ')+message+'\\n'+(hindi?'Vexora जवाब तैयार कर रहा है...':'Vexora is thinking...');$('sendBtn').disabled=true;try{const response=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message})});const data=await response.json();if(!response.ok)throw new Error(data.error||'Request failed');$('chatlog').textContent=(hindi?'आप: ':'You: ')+message+'\\n\\nVEXORA: '+data.reply;}catch(error){$('chatlog').textContent=error.message;}finally{$('sendBtn').disabled=false;}}\n$('voiceBtn').addEventListener('click',()=>{$('chatlog').textContent=hindi?'माइक और AI आवाज़ का फीचर अगले backend चरण में जोड़ा जाएगा।':'Microphone input and AI voice responses will be connected in the backend step.';});
 
-$('loginBtn').addEventListener('click',()=>alert(hindi?'लॉगिन और साइन अप अभी तैयार किए जा रहे हैं।':'Login and sign-up are not connected yet.'));
+$('loginBtn').addEventListener('click',()=>openAuth());
+$('closeAuth').addEventListener('click',()=>{$('authModal').style.display='none';});
+
 document.querySelectorAll('.app-nav button').forEach(button=>button.addEventListener('click',()=>{document.querySelectorAll('.app-nav button').forEach(b=>b.classList.toggle('active',b===button));document.querySelectorAll('main>.page').forEach(p=>p.classList.toggle('active',p.id===button.dataset.page));window.scrollTo({top:0,behavior:'smooth'});}));
-$('saveProfile').addEventListener('click',()=>{$('profileNamePreview').textContent=$('profileName').value.trim()||'Vexora User';$('avatarPreview').textContent=($('profileNamePreview').textContent[0]||'V').toUpperCase();$('saveProfile').textContent='Saved on this device';});
+
 $('goUpload').addEventListener('click',()=>{document.querySelector('[data-page="homePage"]').click();$('upload').scrollIntoView({behavior:'smooth'});});
 $('themeSetting').addEventListener('change',e=>{document.body.style.background=e.target.value==='light'?'#f4f4f7':'#101014';document.body.style.color=e.target.value==='light'?'#17171d':'#f7f7fb';});
 
+</script>
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.86.0';
+const supabase = createClient('https://retyursehkyhzyyemjyz.supabase.co','sb_publishable_0KZ6Xb7FM0RwYebAdUM3Rw_MAbaqiZQ');
+let authMode='login', currentUser=null;
+const el=id=>document.getElementById(id);
+function authMessage(message){el('authMessage').textContent=message;}
+function openAuth(){el('authModal').style.display='block';authMessage('');}
+function setAuthMode(mode){authMode=mode;el('authTitle').textContent=mode==='login'?'Vexora Login':'Create your Vexora account';el('authSubmit').textContent=mode==='login'?'Login':'Sign up';el('authSwitch').textContent=mode==='login'?'Create account':'I already have an account';el('authNameWrap').style.display=mode==='signup'?'grid':'none';el('authPassword').autocomplete=mode==='login'?'current-password':'new-password';authMessage('');}
+el('authSwitch').addEventListener('click',()=>setAuthMode(authMode==='login'?'signup':'login'));
+el('authSubmit').addEventListener('click',async()=>{
+ const email=el('authEmail').value.trim(), password=el('authPassword').value;
+ if(!email||password.length<6){authMessage('Enter a valid email and password with at least 6 characters.');return;}
+ el('authSubmit').disabled=true;
+ try{
+  if(authMode==='signup'){
+   const {data,error}=await supabase.auth.signUp({email,password,options:{data:{display_name:el('authName').value.trim()}}});
+   if(error) throw error;
+   if(data.session){authMessage('Account created and signed in.');await loadAccount();}
+   else authMessage('Account created. Check your email and confirm your address, then log in.');
+  }else{
+   const {error}=await supabase.auth.signInWithPassword({email,password});if(error)throw error;
+   el('authModal').style.display='none';await loadAccount();
+  }
+ }catch(error){authMessage(error.message||'Authentication failed.');}
+ finally{el('authSubmit').disabled=false;}
+});
+async function loadAccount(){
+ const {data:{user}}=await supabase.auth.getUser();currentUser=user;
+ if(!user){el('loginBtn').textContent='Login';return;}
+ el('loginBtn').textContent='Logout';
+ const {data,error}=await supabase.from('profiles').select('display_name,bio').eq('id',user.id).maybeSingle();
+ if(error){console.error('Profile load failed',error);return;}
+ el('profileName').value=data?.display_name||user.user_metadata?.display_name||'';
+ el('profileBio').value=data?.bio||'';
+ const name=el('profileName').value||user.email||'Vexora User';
+ el('profileNamePreview').textContent=name;el('avatarPreview').textContent=name[0].toUpperCase();
+}
+el('loginBtn').addEventListener('click',async()=>{
+ if(!currentUser){openAuth();return;}
+ const {error}=await supabase.auth.signOut();if(error){alert(error.message);return;}
+ currentUser=null;el('loginBtn').textContent='Login';el('profileName').value='';el('profileBio').value='';el('profileNamePreview').textContent='Vexora User';el('avatarPreview').textContent='V';
+});
+el('saveProfile').addEventListener('click',async()=>{
+ if(!currentUser){openAuth();authMessage('Please log in to save your profile.');return;}
+ const display_name=el('profileName').value.trim(), bio=el('profileBio').value.trim();
+ const {error}=await supabase.from('profiles').update({display_name,bio}).eq('id',currentUser.id);
+ if(error){alert('Profile save failed: '+error.message);return;}
+ el('profileNamePreview').textContent=display_name||'Vexora User';el('avatarPreview').textContent=(display_name||'V')[0].toUpperCase();el('saveProfile').textContent='Profile saved';
+});
+supabase.auth.onAuthStateChange((_event,session)=>{currentUser=session?.user||null;el('loginBtn').textContent=currentUser?'Logout':'Login';});
+loadAccount();
 </script>
 </body></html>
