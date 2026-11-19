@@ -106,8 +106,8 @@ el('uploadMediaBtn').addEventListener('click',async()=>{
  const notice=el('uploadNotice');
  if(!currentUser){openAuth();authMessage('Please log in before uploading.');return;}
  if(!files.length){notice.textContent='पहले एक photo या video चुनें।';return;}
- const allowed=/^(image\\/(jpeg|png|webp|gif)|video\\/(mp4|webm|quicktime))$/;
- for(const file of files){if(!allowed.test(file.type)){notice.textContent='यह file type supported नहीं है: '+file.name;return;}if(file.size>100*1024*1024){notice.textContent=file.name+' 100 MB से बड़ी है।';return;}}
+ const allowed=file=>(['image/jpeg','image/png','image/webp','image/gif','video/mp4','video/webm','video/quicktime'].includes(file.type));
+ for(const file of files){if(!allowed(file)){notice.textContent='यह file type supported नहीं है: '+file.name;return;}if(file.size>100*1024*1024){notice.textContent=file.name+' 100 MB से बड़ी है।';return;}}
  const button=el('uploadMediaBtn');button.disabled=true;
  let done=0,errors=[];
  for(const file of files){
