@@ -110,6 +110,9 @@ el('uploadMediaBtn').addEventListener('click',async()=>{
  if(!files.length){notice.textContent='पहले एक photo या video चुनें।';return;}
  const allowed=file=>(['image/jpeg','image/png','image/webp','image/gif','video/mp4','video/webm','video/quicktime'].includes(file.type));
  for(const file of files){if(!allowed(file)){notice.textContent='यह file type supported नहीं है: '+file.name;return;}if(file.size>100*1024*1024){notice.textContent=file.name+' 100 MB से बड़ी है।';return;}}
+ const {data:accountStatus,error:accountError}=await supabase.from('profiles').select('suspended_until,violation_count').eq('id',currentUser.id).maybeSingle();
+ if(accountError){notice.textContent='Could not verify account status. Please try again.';return;}
+ if(accountStatus?.suspended_until && new Date(accountStatus.suspended_until)>new Date()){notice.textContent='Your account is temporarily blocked until '+new Date(accountStatus.suspended_until).toLocaleString()+'.';return;}
  const button=el('uploadMediaBtn');button.disabled=true;
  let done=0,errors=[];
  for(const file of files){
@@ -118,13 +121,18 @@ el('uploadMediaBtn').addEventListener('click',async()=>{
   try{
    const {error:uploadError}=await supabase.storage.from('vexora-videos').upload(path,file,{contentType:file.type,upsert:false});
    if(uploadError)throw uploadError;
-   const {error:rowError}=await supabase.from('videos').insert({uploader_id:currentUser.id,title:file.name,description:'',storage_path:path,status:'pending',visibility:'private',performer_age_verified:false,consent_verified:false});
+   const {data:videoRow,error:rowError}=await supabase.from('videos').insert({uploader_id:currentUser.id,title:file.name,description:'',storage_path:path,status:'pending',visibility:'private',performer_age_verified:false,consent_verified:false}).select('id').single();
    if(rowError){await supabase.storage.from('vexora-videos').remove([path]);throw rowError;}
+   const {data:moderation,error:moderationError}=await supabase.functions.invoke('moderate-upload',{body:{video_id:videoRow.id}});
+   if(moderationError){errors.push(file.name+': uploaded privately; AI moderation failed ('+moderationError.message+').');done++;continue;}
    done++;
+   if(moderation?.status==='rejected') notice.textContent=file.name+' — AI rejected. Violation '+(moderation.moderation?.violation_count||'recorded')+'.';
+   else if(moderation?.status==='quarantined') notice.textContent=file.name+' — kept private in quarantine.';
+   else if(moderation?.status==='approved') notice.textContent=file.name+' — AI approved.';
   }catch(e){errors.push(file.name+': '+(e.message||'Upload failed'));}
   notice.textContent='Uploaded '+done+' of '+files.length+' file(s)...';
  }
- notice.textContent=done+' file(s) securely uploaded to private storage.'+(errors.length?' Errors: '+errors.join(' | '):' Files are private and pending review.');
+ if(errors.length) notice.textContent=done+' file(s) uploaded. '+errors.join(' | '); else notice.textContent=done+' file(s) processed by AI moderation. Check My Uploads for status.';
  button.disabled=false;
 });
 async function loadMyUploads(){
