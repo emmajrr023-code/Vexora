@@ -11,7 +11,7 @@
 /* Vexora navigation and account screens */
 .app-nav{position:fixed;bottom:0;left:0;right:0;z-index:10;display:grid;grid-template-columns:repeat(5,1fr);gap:4px;padding:8px max(10px,env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom));background:#17171fee;border-top:1px solid var(--line);backdrop-filter:blur(12px)}
 .app-nav button{background:transparent;color:var(--muted);border:0;border-radius:10px;padding:8px 3px;font-size:12px}.app-nav button.active{background:#3a202b;color:#fff}.app-nav span{display:block;font-size:19px;margin-bottom:2px}
-main{padding-bottom:88px}.page{display:none}.page.active{display:block}.avatar{width:76px;height:76px;border-radius:50%;background:#3a2631;display:grid;place-items:center;font-size:30px;font-weight:bold;color:#ffadbd}.profile-head{display:flex;align-items:center;gap:16px;margin-bottom:18px}.setting-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 0;border-bottom:1px solid var(--line)}.setting-row:last-child{border:0}
+main{padding-bottom:88px}.page{display:none}.page.active{display:block}.avatar{width:76px;height:76px;border-radius:50%;background:#3a2631;display:grid;place-items:center;font-size:30px;font-weight:bold;color:#ffadbd;overflow:hidden}.avatar img{width:100%;height:100%;object-fit:cover}.profile-head{display:flex;align-items:center;gap:16px;margin-bottom:18px}.setting-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 0;border-bottom:1px solid var(--line)}.setting-row:last-child{border:0}
 @media(min-width:760px){.app-nav{left:50%;right:auto;transform:translateX(-50%);width:min(600px,90%);border:1px solid var(--line);border-radius:16px;bottom:12px}}
 </style>
 </head>
@@ -25,7 +25,7 @@ main{padding-bottom:88px}.page{display:none}.page.active{display:block}.avatar{w
 <section id="assistant"><h2 id="aiTitle">Vexora AI Assistant</h2><div class="panel"><div class="chatlog" id="chatlog">नमस्ते! Hello! Ask Vexora anything. Replies are generated securely by the connected AI service.</div><div class="voice-controls"><label>AI voice language<select id="voiceLanguage"><option value="auto">Auto detect / स्वतः पहचानें</option><option>English</option><option>हिन्दी</option><option>বাংলা</option><option>اردو</option><option>தமிழ்</option><option>తెలుగు</option><option>मराठी</option><option>ગુજરાતી</option><option>ಕನ್ನಡ</option><option>മലയാളം</option><option>ਪੰਜਾਬੀ</option><option>ଓଡ଼ିଆ</option><option>অসমীয়া</option><option>नेपाली</option><option>Français</option><option>Español</option><option>Deutsch</option><option>العربية</option><option>中文</option><option>日本語</option><option>한국어</option><option>Português</option><option>Русский</option><option>Italiano</option><option>Türkçe</option></select></label><label>Voice type<select id="voiceGender"><option value="female">Female voice / महिला आवाज़</option><option value="male">Male voice / पुरुष आवाज़</option></select></label></div><div class="chatrow"><input id="question" placeholder="अपना सवाल लिखें / Ask a question"><button class="btn primary" id="sendBtn">Send</button><button class="btn secondary" id="voiceBtn" type="button">🎙️ Speak</button></div><div class="notice" id="aiNotice">AI replies use the secure server connection. Voice input and spoken replies depend on your browser and device.</div></div></section>
 <section><h2 id="privacyTitle">Your privacy choices</h2><div class="grid"><div class="panel"><strong>🌍 Public</strong><p class="muted" id="publicDesc">Approved media can be discovered and watched by everyone.</p></div><div class="panel"><strong>🔒 Private</strong><p class="muted" id="privateDesc">Private media is visible only to its owner after sign-in.</p></div></div></section>
 </div>
-<section id="profilePage" class="page"><h2>My Profile</h2><div class="panel"><div class="profile-head"><div class="avatar" id="avatarPreview">V</div><div><strong id="profileNamePreview">Vexora User</strong><div class="muted">Your personal profile</div></div></div><div class="field"><label for="profileName">Display name</label><input id="profileName" placeholder="Your name" value="Vexora User"></div><div class="field"><label for="profileBio">Bio</label><input id="profileBio" placeholder="Tell people about yourself"></div><button class="btn primary" id="saveProfile">Save profile on this device</button><p class="notice" id="profileNotice">Log in to view and update your private profile.</p></div></section>
+<section id="profilePage" class="page"><h2>My Profile</h2><div class="panel"><div class="profile-head"><div class="avatar" id="avatarPreview">V</div><div><strong id="profileNamePreview">Vexora User</strong><div class="muted">Your personal profile</div></div></div><div class="field"><label for="profileName">Display name</label><input id="profileName" placeholder="Your name" value="Vexora User"></div><div class="field"><label for="profileBio">Bio</label><input id="profileBio" placeholder="Tell people about yourself"></div><div class="field"><label for="avatarFile">Profile photo (choose from your phone gallery)</label><input id="avatarFile" type="file" accept="image/jpeg,image/png,image/webp"><small class="muted">JPG, PNG or WebP · up to 5 MB</small></div><button class="btn primary" id="saveProfile">Save profile</button><p class="notice" id="profileNotice">Log in to view and update your private profile.</p></div></section>
 <section id="uploadsPage" class="page"><h2>My Uploads</h2><div class="panel"><p class="muted">Your uploaded photos and videos. Uploads are accepted first and kept private while copyright/safety review is pending.</p><button class="btn primary" id="refreshUploads" type="button">Refresh my uploads</button><button class="btn secondary" id="goUpload" type="button">Choose media</button><button class="btn primary" id="uploadFromUploads" type="button">Upload a photo or video</button><div id="myUploadsList" style="margin-top:16px"></div><p class="notice" id="uploadsNotice">Log in to view your uploads.</p><div id="moderationHistory"></div></div></section>
 <section id="adminPage" class="page"><h2>Moderation dashboard</h2><div class="panel"><p class="muted">Review quarantined media and user appeals. Only administrator accounts can access this area.</p><button class="btn primary" id="refreshAdmin" type="button">Refresh review queue</button><div id="adminQueue" style="margin-top:16px"></div><p class="notice" id="adminNotice">Administrator access required.</p></div></section>
 <section id="settingsPage" class="page"><h2>Settings</h2><div class="panel">
@@ -33,7 +33,7 @@ main{padding-bottom:88px}.page{display:none}.page.active{display:block}.avatar{w
 <div class="setting-row"><label for="languageSetting">App language</label><select id="languageSetting"><option>Auto detect</option><option>English</option><option>हिन्दी</option><option>বাংলা</option><option>اردو</option><option>தமிழ்</option><option>తెలుగు</option><option>मराठी</option><option>ગુજરાતી</option><option>ಕನ್ನಡ</option><option>മലയാളം</option><option>ਪੰਜਾਬੀ</option><option>Français</option><option>Español</option><option>Deutsch</option><option>العربية</option><option>中文</option><option>日本語</option></select></div>
 <div class="setting-row"><label for="voiceSetting">AI voice</label><select id="voiceSetting"><option>Female</option><option>Male</option></select></div>
 <div class="setting-row"><label for="privacySetting">Default media privacy</label><select id="privacySetting"><option>Private</option><option>Public</option></select></div>
-<p class="notice">These are interface preferences for now. Account sync, full translation, and AI voice output need their backend services.</p></div></section>
+<p class="notice">These are interface preferences for now. Account sync, full translation, and AI voice output need their backend services.</p></div><div class="panel" style="margin-top:16px"><h3>Vexora earnings & payments</h3><p class="muted">Owner share: 80% · Creator share: 20%. Ad revenue is not live until an ad network approves Vexora and its reporting is connected.</p><p class="muted">To receive your owner share, create or use your own publisher account with the ad network, complete identity/address/tax checks, then add your bank account in that network’s Payments settings. Do not enter bank details into Vexora.</p><div class="row"><a class="btn primary" href="https://www.google.com/adsense/start/" target="_blank" rel="noopener">Google AdSense setup</a><a class="btn secondary" href="earnings.html">Open Earnings Dashboard</a></div><p class="notice">Never share your bank password, OTP, card PIN or AdSense password with anyone.</p></div></section>
 </main>
 <nav class="app-nav" aria-label="Main navigation"><button class="active" data-page="homePage"><span>⌂</span>Home</button><button data-page="profilePage"><span>👤</span>Profile</button><button data-page="uploadsPage"><span>▣</span>Uploads</button><button data-page="settingsPage"><span>⚙</span>Settings</button><button data-page="adminPage" id="adminNav" hidden><span>🛡</span>Review</button></nav>
 <div id="authModal" style="display:none;position:fixed;inset:0;z-index:30;background:#000b;padding:18px;overflow:auto">
@@ -152,7 +152,7 @@ el('authSubmit').addEventListener('click',async()=>{
  finally{el('authSubmit').disabled=false;}
 });
 function clearPrivateViews(){
- el('profileName').value='';el('profileBio').value='';el('profileNamePreview').textContent='Vexora User';el('avatarPreview').textContent='V';
+ el('profileName').value='';el('profileBio').value='';el('profileNamePreview').textContent='Vexora User';renderAvatar(null,'V');el('avatarFile').value='';
  el('myUploadsList').replaceChildren();el('moderationHistory').replaceChildren();
  el('profileNotice').textContent='Log in to view and update your private profile.';el('uploadsNotice').textContent='Log in to view your private uploads.';
  document.querySelector('[data-page="homePage"]').click();
@@ -163,12 +163,12 @@ async function loadAccount(){
  if(!user){window.vexoraIsAdmin=false;el('loginBtn').textContent='Login';clearPrivateViews();return;}
  const {data:isAdmin}=await supabase.rpc('is_admin');window.vexoraIsAdmin=isAdmin===true;if(window.vexoraIsAdmin)el('adminNav').hidden=false;
  el('loginBtn').textContent='Logout';
- const {data,error}=await supabase.from('profiles').select('display_name,bio').eq('id',user.id).maybeSingle();
+ const {data,error}=await supabase.from('profiles').select('display_name,bio,avatar_url').eq('id',user.id).maybeSingle();
  if(error){console.error('Profile load failed',error);return;}
  el('profileName').value=data?.display_name||user.user_metadata?.display_name||'';
  el('profileBio').value=data?.bio||'';
  const name=el('profileName').value||user.email||'Vexora User';
- el('profileNamePreview').textContent=name;el('avatarPreview').textContent=name[0].toUpperCase();
+ el('profileNamePreview').textContent=name;renderAvatar(data?.avatar_url,name);
 }
 el('loginBtn').addEventListener('click',async()=>{
  if(!currentUser){openAuth();return;}
@@ -268,12 +268,31 @@ document.querySelector('[data-page="adminPage"]').addEventListener('click',loadA
 document.querySelector('[data-page="settingsPage"]').addEventListener('click',async()=>{if(currentUser){const {data}=await supabase.rpc('is_admin');if(data===true){const adminNav=document.querySelector('[data-page="settingsPage"]');adminNav.title='Settings · admin dashboard available below';}}});
 el('refreshUploads').addEventListener('click',loadMyUploads);
 document.querySelector('[data-page="uploadsPage"]').addEventListener('click',loadMyUploads);
+function renderAvatar(url,name){
+ const box=el('avatarPreview');box.replaceChildren();
+ if(url){const img=document.createElement('img');img.src=url;img.alt='Profile photo';box.append(img);}
+ else box.textContent=(name||'V')[0].toUpperCase();
+}
 el('saveProfile').addEventListener('click',async()=>{
  if(!currentUser){openAuth();authMessage('Please log in to save your profile.');return;}
  const display_name=el('profileName').value.trim(), bio=el('profileBio').value.trim();
- const {error}=await supabase.from('profiles').update({display_name,bio}).eq('id',currentUser.id);
- if(error){alert('Profile save failed: '+error.message);return;}
- el('profileNamePreview').textContent=display_name||'Vexora User';el('avatarPreview').textContent=(display_name||'V')[0].toUpperCase();el('profileNotice').textContent='Profile saved to your Vexora account.';
+ const file=el('avatarFile').files?.[0];let avatar_url;
+ if(file){
+  if(!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size>5*1024*1024){el('profileNotice').textContent='Choose a JPG, PNG or WebP image smaller than 5 MB.';return;}
+  el('saveProfile').disabled=true;el('profileNotice').textContent='Uploading profile photo...';
+  const ext=file.type==='image/png'?'png':file.type==='image/webp'?'webp':'jpg';
+  const path=currentUser.id+'/'+Date.now()+'_avatar.'+ext;
+  const {error:uploadError}=await supabase.storage.from('vexora-avatars').upload(path,file,{contentType:file.type,upsert:false});
+  if(uploadError){el('profileNotice').textContent='Photo upload failed: '+uploadError.message;el('saveProfile').disabled=false;return;}
+  avatar_url=supabase.storage.from('vexora-avatars').getPublicUrl(path).data.publicUrl;
+ }
+ const updates={display_name,bio};if(avatar_url)updates.avatar_url=avatar_url;
+ const {error}=await supabase.from('profiles').update(updates).eq('id',currentUser.id);
+ el('saveProfile').disabled=false;
+ if(error){el('profileNotice').textContent='Profile save failed: '+error.message;return;}
+ el('profileNamePreview').textContent=display_name||'Vexora User';
+ if(avatar_url)renderAvatar(avatar_url,display_name);else if(!el('avatarPreview').querySelector('img'))renderAvatar(null,display_name);
+ el('profileNotice').textContent='Profile saved to your Vexora account.';el('avatarFile').value='';
 });
 supabase.auth.onAuthStateChange((_event,session)=>{currentUser=session?.user||null;window.vexoraCurrentUser=currentUser;el('loginBtn').textContent=currentUser?'Logout':'Login';if(session?.user){window.setTimeout(()=>loadAccount(),0);}else{window.vexoraIsAdmin=false;el('adminNav').hidden=true;clearPrivateViews();}});
 loadAccount();
