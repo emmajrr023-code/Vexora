@@ -900,6 +900,7 @@ liveEl('copyLiveKey')?.addEventListener('click',async()=>{try{await navigator.cl
 document.querySelector('[data-feed-query="live"]')?.addEventListener('click',()=>{refreshLivePublic();});
 liveDb.auth.onAuthStateChange(()=>{if(!liveEl('liveHub')?.hidden)refreshLivePublic();});
 refreshLivePublic();
+setInterval(()=>{if(activeLiveStream)checkVexoraLive();else refreshLivePublic();},20000);
 </script>
 
 </body></html>
