@@ -61,6 +61,41 @@ main.wrap{padding:14px 12px 92px;margin:0;width:100%}
 .app-nav button[data-page="explorePage"],.app-nav button[data-page="subscriptionsPage"],.app-nav button[data-page="historyPage"]{display:none}
 .feed-grid{grid-template-columns:1fr;gap:22px}.feed-media{border-radius:10px}footer{margin-left:0;margin-bottom:72px}
 }
+
+/* VEXORA white-and-red refresh */
+:root{color-scheme:light;--bg:#fff;--panel:#fff;--muted:#626b78;--line:#e5e7eb;--accent:#e11d36}
+html,body{background:#fff!important;color:#171717!important}
+.top{background:#fff!important;border-bottom:1px solid #e5e7eb!important;box-shadow:0 2px 10px #1111}
+.logo{color:#e11d36!important}
+.top-search{width:min(760px,64vw)!important}
+.top-search input{height:48px!important;background:#fff!important;color:#171717!important;border:1px solid #d1d5db!important;border-radius:28px!important;padding:0 20px!important;box-shadow:0 1px 3px #1111}
+#voiceSearchBtn,#searchTopBtn{display:none!important}
+.top-search input::placeholder{color:#737373}
+.top .btn.secondary{background:#f3f4f6!important;color:#262626!important}
+.top .btn.primary,.btn.primary{background:#e11d36!important;color:#fff!important}
+main.wrap{background:#fff!important}
+.app-nav{background:#fff!important;border-right:1px solid #e5e7eb!important;box-shadow:2px 0 12px #11105}
+.app-nav button{color:#374151!important}
+.app-nav button.active{background:#fff0f1!important;color:#c5162b!important}
+.app-nav button:hover{background:#fef2f2!important}
+.panel,.page-placeholder,.search-card,.feed-comments,.chatlog{background:#fff!important;color:#171717!important;border:1px solid #e5e7eb!important;box-shadow:0 2px 12px #11108}
+h1,h2,h3,.feed-title,.profile-head strong{color:#171717!important}
+p,.muted,.feed-sub,.page-placeholder{color:#626b78}
+.field input,.field select,.searchbar input,.chatrow input,.feed-comments textarea,.voice-controls select{background:#fff!important;color:#171717!important;border:1px solid #d1d5db!important}
+.discovery-chips button{background:#f3f4f6!important;color:#374151!important}
+.discovery-chips button.active{background:#e11d36!important;color:#fff!important}
+.feed-media,.search-card img,.search-card video,.preview img,.preview video{background:#f3f4f6!important}
+.feed-avatar,.avatar{background:#fff0f1!important;color:#c5162b!important}
+.feed-actions button,.feed-actions select,.tabs button{background:#f3f4f6!important;color:#374151!important;border:1px solid #e5e7eb!important}
+.feed-actions button[aria-pressed="true"],.tabs button.active{background:#fff0f1!important;color:#c5162b!important;border-color:#f5a3ad!important}
+.notice{color:#a61b2b!important}
+#search .searchbar{display:none!important}
+.voice-controls,#voiceBtn,.setting-row:has(#voiceSetting){display:none!important}
+#notificationsPanel{background:#fff!important;color:#171717!important;border-color:#e5e7eb!important;box-shadow:0 8px 28px #1112}
+#authModal .panel{background:#fff!important;color:#171717!important}
+footer{background:#fff!important;color:#626b78!important;border-color:#e5e7eb!important}
+@media(max-width:650px){.top-search{width:auto!important;flex:1!important}.top-search input{height:42px!important}.app-nav{background:#fff!important;border-top:1px solid #e5e7eb!important}}
+
 </style>
   <meta name="google-adsense-account" content="ca-pub-3777073112684086">
 </head>
@@ -79,7 +114,7 @@ main.wrap{padding:14px 12px 92px;margin:0;width:100%}
 <section id="uploadsPage" class="page"><h2>My Uploads</h2><div class="panel"><p class="muted">Your uploaded photos and videos. Uploads are accepted first and kept private while copyright/safety review is pending.</p><button class="btn primary" id="refreshUploads" type="button">Refresh my uploads</button><button class="btn secondary" id="goUpload" type="button">Choose media</button><button class="btn primary" id="uploadFromUploads" type="button">Upload a photo or video</button> <a href="/earnings.html" class="btn secondary">Creator earnings</a><section class="panel"><h3>Creator Studio Analytics</h3><div id="creatorAnalytics">Sign in to view channel analytics.</div><button class="btn secondary" id="refreshAnalytics" type="button">Refresh analytics</button></section><div id="myUploadsList" style="margin-top:16px"></div><p class="notice" id="uploadsNotice">Log in to view your uploads.</p><div id="moderationHistory"></div></div></section>
 <section id="adminPage" class="page"><h2>Moderation dashboard</h2><div class="panel"><p class="muted">Review quarantined media and user appeals. Only administrator accounts can access this area.</p><button class="btn primary" id="refreshAdmin" type="button">Refresh review queue</button><div id="adminQueue" style="margin-top:16px"></div><p class="notice" id="adminNotice">Administrator access required.</p></div></section>
 <section id="settingsPage" class="page"><h2>Settings</h2><div class="panel">
-<div class="setting-row"><label for="themeSetting">Appearance</label><select id="themeSetting"><option value="dark">Dark</option><option value="light">Light</option></select></div>
+<div class="setting-row"><label for="themeSetting">Appearance</label><select id="themeSetting"><option value="dark">Dark</option><option value="light" selected>Light</option></select></div>
 <div class="setting-row" hidden><label for="languageSetting">App language</label><select id="languageSetting"><option>Auto detect</option><option>English</option><option>हिन्दी</option><option>বাংলা</option><option>اردو</option><option>தமிழ்</option><option>తెలుగు</option><option>मराठी</option><option>ગુજરાતી</option><option>ಕನ್ನಡ</option><option>മലയാളം</option><option>ਪੰਜਾਬੀ</option><option>Français</option><option>Español</option><option>Deutsch</option><option>العربية</option><option>中文</option><option>日本語</option></select></div>
 <div class="setting-row"><label for="voiceSetting">AI voice</label><select id="voiceSetting"><option>Female</option><option>Male</option></select></div>
 <div class="setting-row"><label for="privacySetting">Default media privacy</label><select id="privacySetting"><option>Private</option><option>Public</option></select></div>
@@ -141,7 +176,7 @@ document.querySelectorAll('.app-nav button').forEach(button=>button.addEventList
 
 $('goUpload').addEventListener('click',()=>{document.querySelector('[data-page="homePage"]').click();$('upload').scrollIntoView({behavior:'smooth'});});
 $('uploadFromUploads').addEventListener('click',()=>{document.querySelector('[data-page="homePage"]').click();$('upload').scrollIntoView({behavior:'smooth'});setTimeout(()=>$('mediaFiles').click(),250);});
-const settingIds=['themeSetting','languageSetting','voiceSetting','privacySetting'];settingIds.forEach(id=>{const saved=localStorage.getItem('vexora_'+id);if(saved&&Array.from($(id).options).some(o=>o.value===saved||o.text===saved))$(id).value=saved;$(id).addEventListener('change',e=>localStorage.setItem('vexora_'+id,e.target.value));});
+const settingIds=['themeSetting','languageSetting','voiceSetting','privacySetting'];settingIds.forEach(id=>{const saved=localStorage.getItem('vexora_'+id);if(saved&&Array.from($(id).options).some(o=>o.value===saved||o.text===saved))$(id).value=saved;else if(id==='themeSetting')$(id).value='light';$(id).addEventListener('change',e=>localStorage.setItem('vexora_'+id,e.target.value));});
 $('privacySetting').addEventListener('change',e=>$('visibility').value=e.target.value.toLowerCase());
 $('voiceSetting').addEventListener('change',e=>$('voiceGender').value=e.target.value.toLowerCase());
 $('languageSetting').addEventListener('change',e=>{const value=e.target.value;const voiceOption=Array.from($('voiceLanguage').options).find(o=>o.text===value);if(voiceOption)$('voiceLanguage').value=voiceOption.value;if(value==='हिन्दी'&&!hindi)$('langBtn').click();else if(value==='English'&&hindi)$('langBtn').click();});
