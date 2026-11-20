@@ -531,6 +531,11 @@ async function loadMyUploads(){
   const title=document.createElement('strong');title.textContent=item.title||'Untitled media';
   const meta=document.createElement('p');meta.className='muted';meta.textContent='Status: '+item.status+' · Visibility: '+item.visibility+' · '+new Date(item.created_at).toLocaleString();
   card.append(title,meta);
+  if(item.status==='pending'){
+   const retry=document.createElement('button');retry.className='btn primary';retry.textContent='Retry AI approval check';
+   retry.addEventListener('click',async()=>{retry.disabled=true;retry.textContent='AI checking…';notice.textContent='Running AI safety check. This may take up to 5 minutes.';try{const {data:review,error:reviewError}=await supabase.functions.invoke('moderate-upload',{body:{video_id:item.id,desired_visibility:item.visibility==='public'?'public':'private'}});if(reviewError){notice.textContent='AI check could not run: '+reviewError.message+' Please try again.';retry.disabled=false;retry.textContent='Retry AI approval check';return;}notice.textContent=review?.message||('AI moderation status: '+(review?.status||'pending'));await loadMyUploads();}catch(err){notice.textContent='AI check failed: '+(err?.message||'Unknown error');retry.disabled=false;retry.textContent='Retry AI approval check';}});
+   card.append(retry);
+  }
   if(['pending','approved'].includes(item.status)){const edit=document.createElement('button');edit.className='btn secondary';edit.textContent='Edit details';edit.addEventListener('click',async()=>{const nextTitle=prompt('Video title (1–120 characters)',item.title||'');if(nextTitle===null)return;const nextDescription=prompt('Description',item.description||'');if(nextDescription===null)return;const nextTags=prompt('Tags separated by commas',(item.tags||[]).join(', '));if(nextTags===null)return;const nextVisibility=item.status==='pending'?'private':(prompt('Privacy: public, unlisted or private',item.visibility||'private')||item.visibility).toLowerCase();const {error}=await supabase.rpc('update_my_video_metadata',{p_video_id:item.id,p_title:nextTitle,p_description:nextDescription,p_tags:nextTags.split(',').map(x=>x.trim()).filter(Boolean),p_visibility:nextVisibility});notice.textContent=error?'Could not update details: '+error.message:'Video details updated.';if(!error)loadMyUploads();});card.append(edit);}
   if(item.status==='rejected'){
    const appealBox=document.createElement('div');appealBox.className='appeal-box';
@@ -545,7 +550,7 @@ async function loadMyUploads(){
   }else{const msg=document.createElement('p');msg.className='muted';msg.textContent='Private preview is temporarily unavailable.';card.append(msg);}
   list.append(card);
  }
- notice.textContent=rows.length+' upload(s) found. Uploads are private while review is pending.';loadCreatorAnalytics();
+ notice.textContent=rows.length+' upload(s) found. Pending uploads can be sent for an AI check using the retry button.';loadCreatorAnalytics();
  const history=el('moderationHistory');history.replaceChildren();const hTitle=document.createElement('h3');hTitle.textContent='Moderation & appeals history';history.append(hTitle);
  const {data:events}=await supabase.from('moderation_events').select('event_type,reason,created_at').eq('user_id',currentUser.id).order('created_at',{ascending:false}).limit(20);
  (events||[]).forEach(ev=>{const p=document.createElement('p');p.className='muted';p.textContent=ev.event_type+' · '+(ev.reason||'')+' · '+new Date(ev.created_at).toLocaleString();history.append(p);});
