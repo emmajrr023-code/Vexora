@@ -648,7 +648,7 @@ async function loadMyUploads(){
   const title=document.createElement('strong');title.textContent=item.title||'Untitled media';
   const meta=document.createElement('p');meta.className='muted';meta.textContent='Status: '+item.status+' · Visibility: '+item.visibility+' · '+new Date(item.created_at).toLocaleString();
   card.append(title,meta);
-  const isMusic=/\\.(mp3|m4a|aac|wav|ogg|opus|flac)$/i.test(item.storage_path||'');
+  const isMusic=/\.(mp3|m4a|aac|wav|ogg|opus|flac)$/i.test(item.storage_path||'');
   if(isMusic){
    const coverWrap=document.createElement('div');coverWrap.className='music-artwork';coverWrap.style.width='min(100%,180px)';
    if(item.thumbnail_path){const {data:coverData}=await supabase.storage.from('vexora-videos').createSignedUrl(item.thumbnail_path,3600);if(coverData?.signedUrl){const coverImg=document.createElement('img');coverImg.src=coverData.signedUrl;coverImg.alt=(item.title||'Song')+' cover art';coverWrap.append(coverImg);}}
