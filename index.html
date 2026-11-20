@@ -187,7 +187,7 @@ async function loadHomeFeed(term='',reset=true){
  if(feedDone)return;
  feedLoading=true;
  const grid=el('homeFeed');
- let query=supabase.from('videos').select('id,title,description,storage_path,created_at,uploader_id,views_count,tags').eq('status','approved').eq('visibility','public').order('created_at',{ascending:false}).range(feedOffset,feedOffset+23);
+ let query=supabase.from('videos').select('id,title,description,storage_path,thumbnail_path,created_at,uploader_id,views_count,tags').eq('status','approved').eq('visibility','public').order('created_at',{ascending:false}).range(feedOffset,feedOffset+23);
  const safeTerm=term.replace(/[%,_()]/g,' ').trim();
  if(safeTerm)query=query.or('title.ilike.%'+safeTerm+'%,description.ilike.%'+safeTerm+'%');
  const {data:rows,error}=await query;
@@ -204,6 +204,7 @@ async function loadHomeFeed(term='',reset=true){
   if(signed?.signedUrl){
    const isVideo=/\.(mp4|webm|mov|m4v)$/i.test(item.storage_path||'');
    media=document.createElement(isVideo?'video':'img');media.className='feed-media';media.src=signed.signedUrl;
+   if(isVideo&&item.thumbnail_path){const {data:thumb}=await supabase.storage.from('vexora-videos').createSignedUrl(item.thumbnail_path,3600);if(thumb?.signedUrl)media.poster=thumb.signedUrl;}
    if(isVideo){media.controls=true;media.preload='metadata';media.playsInline=true;media.addEventListener('play',()=>recordWatch(item.id,media,false));let lastSaved=0;media.addEventListener('timeupdate',()=>{if(Math.floor(media.currentTime/15)>lastSaved){lastSaved=Math.floor(media.currentTime/15);recordWatch(item.id,media,false);}});media.addEventListener('ended',()=>recordWatch(item.id,media,true));}
    else media.alt=item.title||'Vexora video';
    card.append(media);
@@ -234,6 +235,7 @@ async function loadHomeFeed(term='',reset=true){
   comments.append(list,commentInput,post);card.append(comments);grid.append(card);
  }
  feedLoading=false;
+ if(rows.length===24&&!feedDone&&el('feedSentinel').getBoundingClientRect().top<window.innerHeight+600)window.setTimeout(()=>loadHomeFeed(activeFeedTerm,false),0);
 }
 async function loadSubscriptions(){
  const out=el('subscriptionsList');if(!currentUser){out.textContent='Sign in to view channels you follow.';return;}
