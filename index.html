@@ -125,7 +125,7 @@ $('voiceBtn').addEventListener('click',()=>{
  rec.start();
 });
 
-$('loginBtn').addEventListener('click',()=>{if(window.vexoraCurrentUser){supabase.auth.signOut();}else openAuth();});
+$('loginBtn').addEventListener('click',()=>openAuth());
 $('closeAuth').addEventListener('click',()=>{$('authModal').style.display='none';});
 
 document.querySelectorAll('.app-nav button').forEach(button=>button.addEventListener('click',()=>{if(button.dataset.page==='adminPage'&&button.hidden)return;document.querySelectorAll('.app-nav button').forEach(b=>b.classList.toggle('active',b===button));document.querySelectorAll('main>.page').forEach(p=>p.classList.toggle('active',p.id===button.dataset.page));if(button.dataset.page==='profilePage'&&!window.vexoraCurrentUser){$('profileNotice').textContent='Log in to view and edit your private profile. Tap Login above.';}if(button.dataset.page==='uploadsPage'&&!window.vexoraCurrentUser){$('uploadsNotice').textContent='Log in to view your private uploads. Public media remains available from Home search.';}window.scrollTo({top:0,behavior:'smooth'});}));
@@ -203,7 +203,7 @@ document.querySelectorAll('[data-feed-query]').forEach(button=>button.addEventLi
 }));
 loadHomeFeed();
 
-$('topSearchForm').addEventListener('submit',event=>{event.preventDefault();const term=$('headerSearchInput').value.trim();$('mediaSearchInput').value=term;document.querySelector('[data-page="homePage"]').click();$('mediaSearchBtn').click();$('search').scrollIntoView({behavior:'smooth'});});
+el('topSearchForm').addEventListener('submit',event=>{event.preventDefault();const term=el('headerSearchInput').value.trim();el('mediaSearchInput').value=term;document.querySelector('[data-page="homePage"]').click();el('mediaSearchBtn').click();el('search').scrollIntoView({behavior:'smooth'});});
 el('mediaSearchInput').addEventListener('keydown',event=>{if(event.key==='Enter')searchPublicMedia();});
 
 let authMode='login', currentUser=null;
