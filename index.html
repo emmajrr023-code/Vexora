@@ -174,7 +174,7 @@ footer{background:#fff!important;color:#626b78!important;border-color:#e5e7eb!im
 <main class="wrap">
 <div id="homePage" class="page active">
 <section class="hero"><div class="eyebrow" id="eyebrow">AI • VIDEO • PHOTO</div><h1 id="headline">Create. Share. Stream.</h1><p id="intro">Your space for AI conversations, photos and high-quality video streaming—in one place.</p><div class="row"><button class="btn primary" onclick="document.getElementById('upload').scrollIntoView({behavior:'smooth'})" id="uploadCta">Upload media</button><button class="btn secondary" onclick="document.getElementById('assistant').scrollIntoView({behavior:'smooth'})" id="aiCta">Talk to AI</button></div></section>
-<section id="search"><h2>Search public media</h2><div class="panel"><div class="searchbar"><input id="mediaSearchInput" type="search" placeholder="Search photos, videos, topics..."><button class="btn primary" id="mediaSearchBtn" type="button">Search</button></div><p class="muted" id="searchMessage">Find approved public photos and videos on Vexora. Private uploads are never shown.</p><div class="search-results" id="searchResults"></div></div><div class="discovery-chips" aria-label="Explore categories"><button class="active" data-feed-query="">All</button><button data-feed-query="music">Music</button><button data-feed-query="gaming">Gaming</button><button data-feed-query="education">Education</button><button data-feed-query="technology">Technology</button><button data-feed-query="shorts">Short videos</button><button data-feed-query="live">Live</button></div><section id="recommendedSection"><h2>Recommended</h2><div class="feed-grid" id="homeFeed"><div class="feed-empty">Loading videos…</div></div><div id="feedSentinel" aria-hidden="true"></div></section>
+<section id="search"><h2>Search public media</h2><div class="panel"><div class="searchbar"><input id="mediaSearchInput" type="search" placeholder="Search photos, videos, topics..."><button class="btn primary" id="mediaSearchBtn" type="button">Search</button></div><p class="muted" id="searchMessage">Find approved public photos and videos on Vexora. Private uploads are never shown.</p><div class="search-results" id="searchResults"></div></div><div class="discovery-chips" aria-label="Explore categories"><button class="active" data-feed-query="">All</button><button data-feed-query="music">Music</button><button data-feed-query="videos">Videos</button><button data-feed-query="gaming">Gaming</button><button data-feed-query="technology">Technology</button><button data-feed-query="shorts">Short videos</button><button data-feed-query="live">Live</button></div><section id="musicHub" class="panel" hidden style="margin:12px 0"><h2>Music</h2><p class="muted">Listen to tracks shared by creators, or upload your own audio.</p><div class="field"><label for="musicTrackTitle">Song title</label><input id="musicTrackTitle" maxlength="120" placeholder="Enter song title"></div><div class="field"><label for="musicTrackFile">Choose music file</label><input id="musicTrackFile" type="file" accept="audio/mpeg,audio/mp4,audio/aac,audio/wav,audio/ogg,audio/webm,audio/flac,.mp3,.m4a,.aac,.wav,.ogg,.opus,.flac"></div><div class="row"><button class="btn primary" id="uploadMusicBtn" type="button">Upload Music</button><span class="muted" id="musicUploadStatus">MP3, M4A, AAC, WAV, OGG or FLAC · Max 100 MB</span></div></section><section id="liveHub" class="panel" hidden style="margin:12px 0"><h2>Go Live</h2><p class="muted">Start a live broadcast and let your audience join in real time.</p><button class="btn primary" id="goLiveBtn" type="button">Start Live</button><p class="notice" id="liveSetupStatus">Live broadcasting needs a streaming service and server-side stream keys. This VEXORA project does not have a live-stream service connected yet.</p></section><section id="recommendedSection"><h2>Recommended</h2><div class="feed-grid" id="homeFeed"><div class="feed-empty">Loading videos…</div></div><div id="feedSentinel" aria-hidden="true"></div></section>
 </section>
 <section id="upload"><h2 id="uploadTitle">Upload photos & videos</h2><div class="panel"><div class="grid"><div class="field"><label for="mediaFiles" id="chooseLabel">Choose photos or videos</label><input id="mediaFiles" type="file" accept="image/*,video/*" multiple></div><div class="field"><label for="visibility" id="visibilityLabel">Who can see this?</label><select id="visibility"><option value="private">Private — only me</option><option value="public">Public — publish instantly</option></select></div><div class="field"><label for="uploadQuality">Upload quality</label><select id="uploadQuality"><option value="low">Low — smaller file</option><option value="hq" selected>HQ — balanced</option><option value="hd">HD — highest source quality</option></select><small class="muted">Quality choice is saved for this upload; video transcoding is not enabled yet.</small></div></div><div class="field"><label for="uploadTitleInput">Video title</label><input id="uploadTitleInput" maxlength="120" placeholder="Add a title"></div><div class="field"><label for="uploadDescription">Description</label><textarea id="uploadDescription" maxlength="5000" rows="3" placeholder="Tell viewers about this video"></textarea></div><div class="field"><label for="uploadTags">Tags</label><input id="uploadTags" placeholder="Add tags separated by commas"></div><div class="row"><button class="btn secondary" id="previewBtn">Preview selected media</button><button class="btn primary" id="uploadMediaBtn" type="button">Upload selected files</button><span class="muted" id="visibilityHint">Choose Public or Private for each upload. Public media publishes immediately; Private media remains visible only to you. Vexora AI scans in the background and can flag content under platform rules.</span></div><div class="preview" id="preview"></div><div id="uploadProgressWrap" hidden style="margin-top:14px"><div class="row" style="justify-content:space-between"><strong id="uploadProgressLabel">Uploading…</strong><span id="uploadProgressPercent">0%</span></div><div style="height:9px;background:#eee;border-radius:99px;overflow:hidden;margin:8px 0"><div id="uploadProgressBar" style="height:100%;width:0;background:#e11d36;transition:width .2s"></div></div><small class="muted" id="uploadProgressMeta" aria-live="polite">Preparing upload…</small></div><div class="notice" id="uploadNotice">Choose files and upload them securely to your private Vexora storage. Maximum 100 MB per file.</div></div></section>
 <section id="assistant"><h2 id="aiTitle">Vexora AI Assistant</h2><div class="panel"><div class="chatlog" id="chatlog">Hello! Ask Vexora anything. Replies are generated securely by the connected AI service.</div><div class="voice-controls"><label>AI voice language<select id="voiceLanguage"><option value="auto">Auto detect / स्वतः पहचानें</option><option>English</option><option>हिन्दी</option><option>বাংলা</option><option>اردو</option><option>தமிழ்</option><option>తెలుగు</option><option>मराठी</option><option>ગુજરાતી</option><option>ಕನ್ನಡ</option><option>മലയാളം</option><option>ਪੰਜਾਬੀ</option><option>ଓଡ଼ିଆ</option><option>অসমীয়া</option><option>नेपाली</option><option>Français</option><option>Español</option><option>Deutsch</option><option>العربية</option><option>中文</option><option>日本語</option><option>한국어</option><option>Português</option><option>Русский</option><option>Italiano</option><option>Türkçe</option></select></label><label>Voice type<select id="voiceGender"><option value="female">Female voice / महिला आवाज़</option><option value="male">Male voice / पुरुष आवाज़</option></select></label></div><div class="chatrow"><input id="question" placeholder="अपना सवाल लिखें / Ask a question"><button class="btn primary" id="sendBtn">Send</button><button class="btn secondary" id="voiceBtn" type="button">🎙️ Speak</button></div><div class="notice" id="aiNotice">AI replies use the secure server connection. Voice input and spoken replies depend on your browser and device.</div></div></section>
@@ -305,9 +305,10 @@ async function searchPublicMedia(){
   if(item.description){const desc=document.createElement('p');desc.textContent=item.description;card.append(desc);}
   const {data:signed,error:signedError}=await supabase.storage.from('vexora-videos').createSignedUrl(item.storage_path,3600);
   if(!signedError&&signed?.signedUrl){
+   const isAudio=/\.(mp3|m4a|aac|wav|ogg|opus|flac)$/i.test(item.storage_path||'');
    const isVideo=/\.(mp4|webm|mov|m4v)$/i.test(item.storage_path||'');
-   const media=document.createElement(isVideo?'video':'img');media.src=signed.signedUrl;
-   if(isVideo){media.controls=true;media.preload='metadata';}else media.alt=item.title||'Public Vexora media';
+   const media=document.createElement(isAudio?'audio':(isVideo?'video':'img'));media.src=signed.signedUrl;
+   if(isVideo||isAudio){media.controls=true;media.preload='metadata';}else media.alt=item.title||'Public Vexora media';
    card.append(media);
   }else{const unavailable=document.createElement('p');unavailable.textContent='Preview is temporarily unavailable.';card.append(unavailable);}
   const date=document.createElement('small');date.className='muted';date.textContent=new Date(item.created_at).toLocaleDateString();card.append(date);
@@ -317,7 +318,7 @@ async function searchPublicMedia(){
 }
 
 el('mediaSearchBtn').addEventListener('click',searchPublicMedia);
-let feedOffset=0,feedDone=false,feedLoading=false,activeFeedTerm='';
+let feedOffset=0,feedDone=false,feedLoading=false,activeFeedTerm='',activeFeedMode='all';
  const feedVideoRatios=new Map();let activeFeedVideo=null;let feedAutoSwitching=false;
  function stopOtherFeedVideos(keep=null){document.querySelectorAll('#homeFeed video.feed-media').forEach(v=>{if(v!==keep&&!v.paused){v.pause();}});if(keep)activeFeedVideo=keep;else if(activeFeedVideo&&!activeFeedVideo.paused)activeFeedVideo.pause();}
  const feedVideoObserver=new IntersectionObserver(entries=>{for(const entry of entries)feedVideoRatios.set(entry.target,entry.isIntersecting?entry.intersectionRatio:0);let best=null,bestRatio=0;for(const [video,ratio] of feedVideoRatios){if(!video.isConnected){feedVideoRatios.delete(video);continue;}if(ratio>bestRatio){best=video;bestRatio=ratio;}}if(best&&bestRatio>=0.6){if(activeFeedVideo!==best||best.paused){stopOtherFeedVideos(best);feedAutoSwitching=true;best.play().catch(()=>{}).finally(()=>{feedAutoSwitching=false;});}}else if(activeFeedVideo){activeFeedVideo.pause();activeFeedVideo=null;}},{threshold:[0,0.25,0.5,0.6,0.75,1]});
@@ -332,7 +333,7 @@ async function loadHomeFeed(term='',reset=true){
  let query=supabase.from('videos').select('id,title,description,storage_path,thumbnail_path,created_at,uploader_id,views_count,tags').eq('status','approved').eq('visibility','public').order('created_at',{ascending:false}).range(feedOffset,feedOffset+23);
   const sharedVideoId=new URLSearchParams(location.search).get('video');if(reset&&sharedVideoId)query=query.eq('id',sharedVideoId);
  const safeTerm=term.replace(/[%,_()]/g,' ').trim();
- if(safeTerm)query=query.or('title.ilike.%'+safeTerm+'%,description.ilike.%'+safeTerm+'%');
+ if(safeTerm&&safeTerm!=='videos'&&safeTerm!=='live')query=query.or('title.ilike.%'+safeTerm+'%,description.ilike.%'+safeTerm+'%');
  const {data:rows,error}=await query;
  if(error){const p=document.createElement('div');p.className='feed-empty';p.textContent='Videos could not be loaded right now.';grid.append(p);feedLoading=false;return;}
  if(!rows?.length){feedDone=true;if(feedOffset===0){const p=document.createElement('div');p.className='feed-empty';p.textContent='No public videos yet. Be the first to share a video on Vexora.';grid.append(p);}feedLoading=false;return;}
@@ -341,12 +342,18 @@ async function loadHomeFeed(term='',reset=true){
  const {data:channels}=await supabase.from('channel_public_profiles').select('id,display_name,avatar_url,banner_url').in('id',ids);
  const channelMap=new Map((channels||[]).map(x=>[x.id,x]));
  for(const item of rows){
+  const audioFile=/\.(mp3|m4a|aac|wav|ogg|opus|flac)$/i.test(item.storage_path||'');
+  if(activeFeedMode==='music'&&!audioFile)continue;
+  if(activeFeedMode==='videos'&&audioFile)continue;
+  if(activeFeedMode==='live')continue;
   const card=document.createElement('article');card.className='feed-card';card.dataset.videoId=item.id;
   const {data:signed}=await supabase.storage.from('vexora-videos').createSignedUrl(item.storage_path,3600);
   let media=null;
   if(signed?.signedUrl){
+   const isAudio=/\.(mp3|m4a|aac|wav|ogg|opus|flac)$/i.test(item.storage_path||'');
    const isVideo=/\.(mp4|webm|mov|m4v)$/i.test(item.storage_path||'');
-   media=document.createElement(isVideo?'video':'img');media.className='feed-media';media.src=signed.signedUrl;
+   media=document.createElement(isAudio?'audio':(isVideo?'video':'img'));media.className='feed-media';media.src=signed.signedUrl;
+   if(isAudio){media.controls=true;media.preload='metadata';media.style.width='100%';media.style.display='block';media.style.margin='12px 0';}
    if(isVideo&&item.thumbnail_path){const {data:thumb}=await supabase.storage.from('vexora-videos').createSignedUrl(item.thumbnail_path,3600);if(thumb?.signedUrl)media.poster=thumb.signedUrl;}
    if(isVideo){media.controls=true;media.preload='metadata';media.playsInline=true;media.setAttribute('controlsList','nodownload');media.addEventListener('play',()=>{if(activeFeedVideo!==media)stopOtherFeedVideos(media);});media.addEventListener('pause',()=>{if(activeFeedVideo===media)activeFeedVideo=null;});feedVideoRatios.set(media,0);feedVideoObserver.observe(media);attachWatchTracking(item.id,media);}
    else media.alt=item.title||'Vexora video';
@@ -480,8 +487,11 @@ async function recordWatch(videoId,video,completed){
  if(error)console.warn('Watch history could not be saved',error);
 }
 document.querySelectorAll('[data-feed-query]').forEach(button=>button.addEventListener('click',()=>{
+ const mode=button.dataset.feedQuery||'all';activeFeedMode=mode;
  document.querySelectorAll('[data-feed-query]').forEach(b=>b.classList.toggle('active',b===button));
- loadHomeFeed(button.dataset.feedQuery||'',true);
+ el('musicHub').hidden=mode!=='music';el('liveHub').hidden=mode!=='live';
+ if(mode==='music')el('recommendedSection').querySelector('h2').textContent='Music tracks';else if(mode==='videos')el('recommendedSection').querySelector('h2').textContent='Videos';else if(mode==='live')el('recommendedSection').querySelector('h2').textContent='Live broadcasts';else el('recommendedSection').querySelector('h2').textContent='Recommended';
+ loadHomeFeed(mode==='music'?'music':(mode==='videos'||mode==='live'?'':'shorts'),true);
 }));
 loadHomeFeed('',true);
 const feedObserver=new IntersectionObserver(entries=>{if(entries.some(e=>e.isIntersecting))loadHomeFeed(activeFeedTerm,false);},{rootMargin:'600px'});feedObserver.observe(el('feedSentinel'));
@@ -550,12 +560,34 @@ el('loginBtn').addEventListener('click',async()=>{
  const {error}=await supabase.auth.signOut();if(error){alert(error.message);return;}
  currentUser=null;window.vexoraCurrentUser=null;el('loginBtn').textContent='Login';clearPrivateViews();
 });
+el('uploadMusicBtn')?.addEventListener('click',async()=>{
+ const file=el('musicTrackFile').files?.[0],status=el('musicUploadStatus');
+ if(!currentUser){openAuth();authMessage('Please log in before uploading music.');return;}
+ if(!file){status.textContent='Please choose an audio file.';return;}
+ if(!/^(audio\\/(mpeg|mp4|aac|wav|ogg|webm|flac))$/.test(file.type)&&! /\\.(mp3|m4a|aac|wav|ogg|opus|flac)$/i.test(file.name)){status.textContent='Unsupported audio format.';return;}
+ if(file.size>100*1024*1024){status.textContent='Audio file must be 100 MB or smaller.';return;}
+ const button=el('uploadMusicBtn');button.disabled=true;status.textContent='Uploading music…';
+ const path=currentUser.id+'/'+Date.now()+'_music_'+file.name.replace(/[^a-zA-Z0-9._-]/g,'_');
+ try{
+  await uploadFileWithProgress(path,file,()=>{});
+  const {error}=await supabase.from('videos').insert({uploader_id:currentUser.id,title:el('musicTrackTitle').value.trim()||file.name,description:'Music track uploaded to VEXORA',tags:['music'],category_id:'5395b334-c49e-4275-af89-e8122e27ab22',storage_path:path,status:'approved',visibility:el('visibility')?.value==='public'?'public':'private',performer_age_verified:false,consent_verified:false});
+  if(error){await supabase.storage.from('vexora-videos').remove([path]);throw error;}
+  status.textContent='Music uploaded successfully. It will appear in Music when its visibility is Public.';
+  el('musicTrackFile').value='';el('musicTrackTitle').value='';
+  if(el('visibility')?.value==='public')loadHomeFeed('music',true);
+ }catch(error){status.textContent='Music upload failed: '+(error.message||'Please retry.');}
+ finally{button.disabled=false;}
+});
+el('goLiveBtn')?.addEventListener('click',()=>{
+ const status=el('liveSetupStatus');
+ status.textContent='Live streaming is not connected yet. A streaming provider (such as a live video ingest service) and secure server-side stream-key setup are required before broadcasts can go public. No live stream has been started.';
+});
 el('uploadMediaBtn').addEventListener('click',async()=>{
  const files=Array.from(el('mediaFiles').files||[]);
  const notice=el('uploadNotice');
  if(!currentUser){openAuth();authMessage('Please log in before uploading.');return;}
  if(!files.length){notice.textContent='Please choose a photo or video first.';return;}
- const allowed=file=>(['image/jpeg','image/png','image/webp','image/gif','video/mp4','video/webm','video/quicktime'].includes(file.type));
+ const allowed=file=>(['image/jpeg','image/png','image/webp','image/gif','video/mp4','video/webm','video/quicktime','audio/mpeg','audio/mp4','audio/aac','audio/wav','audio/ogg','audio/webm','audio/flac'].includes(file.type)||/\\.(mp3|m4a|aac|wav|ogg|opus|flac)$/i.test(file.name));
  for(const file of files){if(!allowed(file)){notice.textContent='यह file type supported नहीं है: '+file.name;return;}if(file.size>100*1024*1024){notice.textContent=file.name+' 100 MB is too large.';return;}}
  const {data:accountStatus,error:accountError}=await supabase.from('profiles').select('suspended_until,violation_count').eq('id',currentUser.id).maybeSingle();
  if(accountError){notice.textContent='Could not verify account status. Please try again.';return;}
