@@ -116,7 +116,7 @@ footer{background:#fff!important;color:#626b78!important;border-color:#e5e7eb!im
 </div>
 <section id="profilePage" class="page"><h2>My Profile</h2><div class="panel"><img class="profile-banner" id="bannerPreview" alt="Channel banner" hidden><div class="profile-head"><div class="avatar" id="avatarPreview">V</div><div><strong id="profileNamePreview">Vexora User</strong><div class="muted">Your personal profile</div></div></div><div class="field"><label for="profileName">Display name</label><input id="profileName" placeholder="Your name" value="Vexora User"></div><div class="field"><label for="profileBio">Bio</label><input id="profileBio" placeholder="Tell people about yourself"></div><div class="field"><label for="bannerFile">Channel art (JPG, PNG or WebP · up to 5 MB)</label><input id="bannerFile" type="file" accept="image/jpeg,image/png,image/webp"></div><div class="field"><label for="avatarFile">Profile photo (choose from your phone gallery)</label><input id="avatarFile" type="file" accept="image/jpeg,image/png,image/webp"><small class="muted">JPG, PNG or WebP · up to 5 MB</small></div><button class="btn primary" id="saveProfile">Save profile</button><p class="notice" id="profileNotice">Log in to view and update your private profile.</p></div></section>
 <section id="uploadsPage" class="page"><h2>My Uploads</h2><div class="panel"><p class="muted">Your uploaded photos and videos. Uploads are accepted first and kept private while copyright/safety review is pending.</p><button class="btn primary" id="refreshUploads" type="button">Refresh my uploads</button><button class="btn secondary" id="goUpload" type="button">Choose media</button><button class="btn primary" id="uploadFromUploads" type="button">Upload a photo or video</button> <a href="/earnings.html" class="btn secondary">Creator earnings</a><section class="panel"><h3>Creator Studio Analytics</h3><div id="creatorAnalytics">Sign in to view channel analytics.</div><button class="btn secondary" id="refreshAnalytics" type="button">Refresh analytics</button></section><div id="myUploadsList" style="margin-top:16px"></div><p class="notice" id="uploadsNotice">Log in to view your uploads.</p><div id="moderationHistory"></div></div></section>
-<section id="adminPage" class="page"><h2>Moderation dashboard</h2><div class="panel"><p class="muted">Review quarantined media and user appeals. Only administrator accounts can access this area.</p><button class="btn primary" id="refreshAdmin" type="button">Refresh review queue</button><div id="adminQueue" style="margin-top:16px"></div><p class="notice" id="adminNotice">Administrator access required.</p></div></section>
+<section id="aiSafetyPage" class="page"><h2>AI Auto Safety</h2><div class="panel"><p class="muted">VEXORA automatically checks each uploaded photo or video with AI. Safe content is approved, confirmed violations are rejected, and uncertain or unsupported files remain private for safety. No manual admin approval is needed for clear AI decisions.</p><button class="btn primary" id="refreshAiSafety" type="button">Refresh AI safety status</button><div id="aiSafetyContent" style="margin-top:16px"></div><p class="notice" id="aiSafetyNotice">Sign in to view your AI moderation activity.</p></div></section>
 <section id="settingsPage" class="page"><h2>Settings</h2><div class="panel">
 <div class="setting-row"><label for="themeSetting">Appearance</label><select id="themeSetting"><option value="light" selected>Light</option></select></div>
 <div class="setting-row" hidden><label for="languageSetting">App language</label><select id="languageSetting"><option>Auto detect</option><option>English</option><option>हिन्दी</option><option>বাংলা</option><option>اردو</option><option>தமிழ்</option><option>తెలుగు</option><option>मराठी</option><option>ગુજરાતી</option><option>ಕನ್ನಡ</option><option>മലയാളം</option><option>ਪੰਜਾਬੀ</option><option>Français</option><option>Español</option><option>Deutsch</option><option>العربية</option><option>中文</option><option>日本語</option></select></div>
@@ -129,7 +129,7 @@ footer{background:#fff!important;color:#626b78!important;border-color:#e5e7eb!im
 <section id="historyPage" class="page"><h2>Watch History</h2><div id="watchHistoryList" class="page-placeholder">Sign in to see your watch history.</div></section>
 </main>
 <nav class="app-nav" aria-label="Main navigation">
-<button class="active" data-page="homePage"><span>⌂</span>Home</button><button data-page="explorePage"><span>⌕</span>Explore</button><button data-page="subscriptionsPage"><span>▤</span>Subscriptions</button><button data-page="libraryPage"><span>▣</span>Library</button><button data-page="historyPage"><span>◷</span>History</button><button data-page="uploadsPage"><span>⇧</span>Uploads</button><button data-page="profilePage"><span>●</span>You</button><button data-page="settingsPage"><span>⚙</span>Settings</button><button data-page="adminPage" id="adminNav" hidden><span>🛡</span>Review</button></nav>
+<button class="active" data-page="homePage"><span>⌂</span>Home</button><button data-page="explorePage"><span>⌕</span>Explore</button><button data-page="subscriptionsPage"><span>▤</span>Subscriptions</button><button data-page="libraryPage"><span>▣</span>Library</button><button data-page="historyPage"><span>◷</span>History</button><button data-page="uploadsPage"><span>⇧</span>Uploads</button><button data-page="profilePage"><span>●</span>You</button><button data-page="settingsPage"><span>⚙</span>Settings</button><button data-page="aiSafetyPage" id="aiSafetyNav" hidden><span>✦</span>AI Safety</button></nav>
 <div id="notificationsPanel" hidden style="position:fixed;z-index:40;top:72px;right:16px;width:min(380px,calc(100vw - 32px));max-height:70vh;overflow:auto;background:#19191d;border:1px solid #444;border-radius:14px;padding:14px"><div class="row" style="justify-content:space-between"><strong>Notifications</strong><button id="closeNotifications" type="button">Close</button></div><div id="notificationsList"></div></div><div id="authModal" style="display:none;position:fixed;inset:0;z-index:30;background:#000b;padding:18px;overflow:auto">
  <div class="panel" style="max-width:440px;margin:8vh auto">
   <div class="row" style="justify-content:space-between"><h2 id="authTitle">Vexora Login</h2><button class="btn secondary" id="closeAuth" type="button">✕</button></div>
@@ -404,9 +404,8 @@ function clearPrivateViews(){
 }
 async function loadAccount(){
  const {data:{user}}=await supabase.auth.getUser();currentUser=user;window.vexoraCurrentUser=user||null;await connectNotifications();
- el('adminNav').hidden=true;
- if(!user){window.vexoraIsAdmin=false;el('loginBtn').textContent='Login';clearPrivateViews();return;}
- const {data:isAdmin}=await supabase.rpc('is_admin');window.vexoraIsAdmin=isAdmin===true;if(window.vexoraIsAdmin)el('adminNav').hidden=false;
+ el('aiSafetyNav').hidden=!user;
+ if(!user){el('loginBtn').textContent='Login';clearPrivateViews();return;}
  el('loginBtn').textContent='Logout';
  const {data,error}=await supabase.from('profiles').select('display_name,bio,avatar_url,banner_url').eq('id',user.id).maybeSingle();
  if(error){console.error('Profile load failed',error);return;}
@@ -500,61 +499,31 @@ async function loadMyUploads(){
  (appeals||[]).forEach(a=>{const p=document.createElement('p');p.className='muted';p.textContent='Appeal: '+a.status+' · '+a.reason+' · '+new Date(a.created_at).toLocaleString();history.append(p);});
 }
 
-async function loadAdminQueue(){
- const out=el('adminQueue'),notice=el('adminNotice');out.replaceChildren();
- if(!currentUser){notice.textContent='Please log in as an administrator.';return;}
- const {data:rows,error}=await supabase.from('videos').select('id,title,description,storage_path,status,visibility,uploader_id,created_at').in('status',['pending','quarantined','rejected']).order('created_at',{ascending:true}).limit(100);
- if(error){notice.textContent='Admin queue unavailable: '+error.message;return;}
- notice.textContent=(rows||[]).length+' item(s) in review queue.';
- for(const item of rows||[]){
-  const card=document.createElement('div');card.className='panel';card.style.marginBottom='12px';
-  const title=document.createElement('strong');title.textContent=item.title||'Untitled media';
-  const meta=document.createElement('p');meta.className='muted';meta.textContent=item.status+' · '+item.visibility+' · '+new Date(item.created_at).toLocaleString();
-  card.append(title,meta);
-  const {data:signed}=await supabase.storage.from('vexora-videos').createSignedUrl(item.storage_path,600);
-  if(signed?.signedUrl){const isVideo=/\.(mp4|webm|mov|m4v)$/i.test(item.storage_path||'');const media=document.createElement(isVideo?'video':'img');media.src=signed.signedUrl;if(isVideo)media.controls=true;else media.alt=item.title||'Review media';media.style.cssText='max-width:100%;max-height:280px';card.append(media);}
-  const actions=document.createElement('div');actions.className='admin-actions';
-  for(const [status,label] of [['approved','Approve'],['rejected','Reject']]){
-   const btn=document.createElement('button');btn.className='btn '+(status==='approved'?'primary':'secondary');btn.textContent=label;
-   btn.addEventListener('click',async()=>{btn.disabled=true;const {error}=await supabase.from('videos').update({status,visibility:status==='approved'?item.visibility:'private'}).eq('id',item.id);if(error){notice.textContent='Update failed: '+error.message;btn.disabled=false;}else{notice.textContent='Item '+label.toLowerCase()+'d.';loadAdminQueue();}});
-   actions.append(btn);
-  }
-  card.append(actions);
-  const {data:appeals}=await supabase.from('video_appeals').select('id,reason,status').eq('video_id',item.id).order('created_at',{ascending:false});
-  (appeals||[]).forEach(a=>{const p=document.createElement('p');p.textContent='Appeal ('+a.status+'): '+a.reason;card.append(p);const resolve=document.createElement('button');resolve.className='btn secondary';resolve.textContent='Mark appeal reviewed';resolve.addEventListener('click',async()=>{const {error}=await supabase.from('video_appeals').update({status:'reviewed',resolved_at:new Date().toISOString()}).eq('id',a.id);notice.textContent=error?error.message:'Appeal marked reviewed.';if(!error)loadAdminQueue();});card.append(resolve);});
-  out.append(card);
- }
- const [pendingComments,openReports]=await Promise.all([
-  supabase.from('comments').select('id,video_id,user_id,content,created_at').eq('status','pending').order('created_at',{ascending:true}).limit(100),
-  supabase.from('reports').select('id,video_id,reason,details,status,created_at').in('status',['pending','reviewed']).order('created_at',{ascending:true}).limit(100)
+async function loadAiSafety(){
+ const out=el('aiSafetyContent'),notice=el('aiSafetyNotice');out.replaceChildren();
+ if(!currentUser){notice.textContent='Please sign in to view your AI moderation activity.';return;}
+ notice.textContent='Loading your AI moderation status...';
+ const [videosResult,eventsResult]=await Promise.all([
+  supabase.from('videos').select('status,visibility').eq('uploader_id',currentUser.id).limit(500),
+  supabase.from('moderation_events').select('event_type,category,reason,created_at,model_name').eq('user_id',currentUser.id).order('created_at',{ascending:false}).limit(20)
  ]);
- const commentPanel=document.createElement('section');commentPanel.className='panel';const ch=document.createElement('h3');ch.textContent='Pending comments';commentPanel.append(ch);
- for(const c of pendingComments.data||[]){
-  const row=document.createElement('div');row.className='admin-actions';const txt=document.createElement('p');txt.textContent=c.content;row.append(txt);
-  for(const [status,label] of [['approved','Approve'],['rejected','Reject']]){
-   const b=document.createElement('button');b.textContent=label;
-   b.addEventListener('click',async()=>{const {error}=await supabase.from('comments').update({status}).eq('id',c.id);if(error)notice.textContent=error.message;else loadAdminQueue();});
-   row.append(b);
-  }
-  commentPanel.append(row);
- }
- if(!(pendingComments.data||[]).length){const p=document.createElement('p');p.textContent='No comments awaiting review.';commentPanel.append(p);}out.append(commentPanel);
- const reportPanel=document.createElement('section');reportPanel.className='panel';const rh=document.createElement('h3');rh.textContent='User reports';reportPanel.append(rh);
- for(const r of openReports.data||[]){
-  const row=document.createElement('div');row.className='admin-actions';const txt=document.createElement('p');txt.textContent=r.reason+' · '+(r.details||'')+' · Video: '+(r.video_id||'Not linked');row.append(txt);
-  for(const [status,label] of [['resolved','Resolve'],['dismissed','Dismiss']]){
-   const b=document.createElement('button');b.textContent=label;
-   b.addEventListener('click',async()=>{const {error}=await supabase.from('reports').update({status}).eq('id',r.id);if(error)notice.textContent=error.message;else loadAdminQueue();});
-   row.append(b);
-  }
-  reportPanel.append(row);
- }
- if(!(openReports.data||[]).length){const p=document.createElement('p');p.textContent='No open reports.';reportPanel.append(p);}out.append(reportPanel);
-
+ if(videosResult.error){notice.textContent='AI safety status unavailable: '+videosResult.error.message;return;}
+ const rows=videosResult.data||[],events=eventsResult.data||[];
+ const counts={approved:0,rejected:0,quarantined:0,pending:0};
+ rows.forEach(item=>{if(Object.prototype.hasOwnProperty.call(counts,item.status))counts[item.status]++;});
+ const summary=document.createElement('div');summary.className='grid';
+ for(const [label,value] of Object.entries(counts)){const card=document.createElement('div');card.className='panel';const strong=document.createElement('strong');strong.textContent=label[0].toUpperCase()+label.slice(1);const number=document.createElement('h2');number.textContent=String(value);card.append(strong,number);summary.append(card);}
+ out.append(summary);
+ const note=document.createElement('p');note.className='muted';note.textContent='AI moderation runs automatically after upload. Public media is only made public when AI approves it and you selected “Public after approval”. Uncertain, oversized, or unsupported media stays private. If the AI service is unavailable, the upload remains private rather than being published.';out.append(note);
+ const history=document.createElement('section');history.className='panel';const heading=document.createElement('h3');heading.textContent='Recent AI moderation activity';history.append(heading);
+ if(eventsResult.error){const p=document.createElement('p');p.textContent='Moderation history unavailable: '+eventsResult.error.message;history.append(p);}
+ else if(!events.length){const p=document.createElement('p');p.textContent='No AI moderation events yet. Upload a photo or video to start automatic checks.';history.append(p);}
+ else events.forEach(event=>{const p=document.createElement('p');p.className='muted';p.textContent=(event.event_type||'AI check')+' · '+(event.category||'general')+' · '+(event.reason||'No additional details')+' · '+new Date(event.created_at).toLocaleString()+(event.model_name?' · '+event.model_name:'');history.append(p);});
+ out.append(history);
+ notice.textContent='AI safety status refreshed. '+rows.length+' upload(s) checked.';
 }
-el('refreshAdmin').addEventListener('click',loadAdminQueue);
-document.querySelector('[data-page="adminPage"]').addEventListener('click',loadAdminQueue);
-document.querySelector('[data-page="settingsPage"]').addEventListener('click',async()=>{if(currentUser){const {data}=await supabase.rpc('is_admin');if(data===true){const adminNav=document.querySelector('[data-page="settingsPage"]');adminNav.title='Settings · admin dashboard available below';}}});
+el('refreshAiSafety').addEventListener('click',loadAiSafety);
+document.querySelector('[data-page="aiSafetyPage"]').addEventListener('click',loadAiSafety);
 $('editProfileFromSettings').addEventListener('click',()=>document.querySelector('[data-page="profilePage"]').click());
 $('homeLogo').addEventListener('click',event=>{event.preventDefault();document.querySelector('[data-page="homePage"]').click();});
 el('refreshUploads').addEventListener('click',loadMyUploads);
@@ -594,7 +563,7 @@ el('saveProfile').addEventListener('click',async()=>{
  if(banner_url){el('bannerPreview').src=banner_url;el('bannerPreview').hidden=false;}el('bannerFile').value='';
  el('profileNotice').textContent='Profile saved to your Vexora account.';el('avatarFile').value='';
 });
-supabase.auth.onAuthStateChange((_event,session)=>{currentUser=session?.user||null;window.vexoraCurrentUser=currentUser;el('loginBtn').textContent=currentUser?'Logout':'Login';if(session?.user){window.setTimeout(()=>loadAccount(),0);}else{window.vexoraIsAdmin=false;el('adminNav').hidden=true;clearPrivateViews();}});
+supabase.auth.onAuthStateChange((_event,session)=>{currentUser=session?.user||null;window.vexoraCurrentUser=currentUser;el('loginBtn').textContent=currentUser?'Logout':'Login';if(session?.user){window.setTimeout(()=>loadAccount(),0);}else{el('aiSafetyNav').hidden=true;clearPrivateViews();}});
 loadAccount();
 </script>
 </body></html>
