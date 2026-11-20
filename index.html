@@ -564,7 +564,7 @@ el('uploadMusicBtn')?.addEventListener('click',async()=>{
  const file=el('musicTrackFile').files?.[0],status=el('musicUploadStatus');
  if(!currentUser){openAuth();authMessage('Please log in before uploading music.');return;}
  if(!file){status.textContent='Please choose an audio file.';return;}
- if(!/^(audio\\/(mpeg|mp4|aac|wav|ogg|webm|flac))$/.test(file.type)&&! /\\.(mp3|m4a|aac|wav|ogg|opus|flac)$/i.test(file.name)){status.textContent='Unsupported audio format.';return;}
+ if(!/^audio\/(mpeg|mp4|aac|wav|ogg|webm|flac)$/.test(file.type)&&! /\.(mp3|m4a|aac|wav|ogg|opus|flac)$/i.test(file.name)){status.textContent='Unsupported audio format.';return;}
  if(file.size>100*1024*1024){status.textContent='Audio file must be 100 MB or smaller.';return;}
  const button=el('uploadMusicBtn');button.disabled=true;status.textContent='Uploading music…';
  const path=currentUser.id+'/'+Date.now()+'_music_'+file.name.replace(/[^a-zA-Z0-9._-]/g,'_');
