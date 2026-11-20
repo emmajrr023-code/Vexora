@@ -67,6 +67,7 @@ main.wrap{padding:14px 12px 92px;margin:0;width:100%}
 html,body{background:#fff!important;color:#171717!important}
 .top{background:#fff!important;border-bottom:1px solid #e5e7eb!important;box-shadow:0 2px 10px #1111}
 .logo{color:#e11d36!important}
+.logo{text-decoration:none;display:inline-block}
 .top-search{width:min(760px,64vw)!important}
 .top-search input{height:48px!important;background:#fff!important;color:#171717!important;border:1px solid #d1d5db!important;border-radius:28px!important;padding:0 20px!important;box-shadow:0 1px 3px #1111}
 #voiceSearchBtn,#searchTopBtn{display:none!important}
@@ -103,7 +104,7 @@ footer{background:#fff!important;color:#626b78!important;border-color:#e5e7eb!im
   <meta name="google-adsense-account" content="ca-pub-3777073112684086">
 </head>
 <body>
-<header class="top"><div class="logo">VEXORA</div><form class="top-search" id="topSearchForm" role="search"><input id="headerSearchInput" type="search" list="searchSuggestions" placeholder="Search videos, creators and topics" aria-label="Search Vexora"><datalist id="searchSuggestions"></datalist><button id="voiceSearchBtn" type="button" aria-label="Voice search">🎙</button><button id="searchTopBtn" type="submit" aria-label="Search">⌕</button></form><button class="btn secondary" id="langBtn" type="button">हिंदी</button><button class="btn secondary" id="notificationsBtn" type="button">Alerts</button><button class="btn primary" id="loginBtn" type="button">Sign in</button></header>
+<header class="top"><a class="logo" href="#homePage" id="homeLogo" aria-label="VEXORA home">VEXORA</a><form class="top-search" id="topSearchForm" role="search"><input id="headerSearchInput" type="search" list="searchSuggestions" placeholder="Search videos, creators and topics" aria-label="Search Vexora"><datalist id="searchSuggestions"></datalist><button id="voiceSearchBtn" type="button" aria-label="Voice search">🎙</button><button id="searchTopBtn" type="submit" aria-label="Search">⌕</button></form><button class="btn secondary" id="langBtn" type="button">हिंदी</button><button class="btn secondary" id="notificationsBtn" type="button">Alerts</button><button class="btn primary" id="loginBtn" type="button">Sign in</button></header>
 <main class="wrap">
 <div id="homePage" class="page active">
 <section class="hero"><div class="eyebrow" id="eyebrow">AI • VIDEO • PHOTO</div><h1 id="headline">Create. Share. Stream.</h1><p id="intro">Your space for AI conversations, photos and high-quality video streaming—in one place.</p><div class="row"><button class="btn primary" onclick="document.getElementById('upload').scrollIntoView({behavior:'smooth'})" id="uploadCta">Upload media</button><button class="btn secondary" onclick="document.getElementById('assistant').scrollIntoView({behavior:'smooth'})" id="aiCta">Talk to AI</button></div></section>
@@ -555,6 +556,7 @@ el('refreshAdmin').addEventListener('click',loadAdminQueue);
 document.querySelector('[data-page="adminPage"]').addEventListener('click',loadAdminQueue);
 document.querySelector('[data-page="settingsPage"]').addEventListener('click',async()=>{if(currentUser){const {data}=await supabase.rpc('is_admin');if(data===true){const adminNav=document.querySelector('[data-page="settingsPage"]');adminNav.title='Settings · admin dashboard available below';}}});
 $('editProfileFromSettings').addEventListener('click',()=>document.querySelector('[data-page="profilePage"]').click());
+$('homeLogo').addEventListener('click',event=>{event.preventDefault();document.querySelector('[data-page="homePage"]').click();});
 el('refreshUploads').addEventListener('click',loadMyUploads);
 document.querySelector('[data-page="uploadsPage"]').addEventListener('click',loadMyUploads);
 function renderAvatar(url,name){
