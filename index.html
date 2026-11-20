@@ -640,7 +640,7 @@ async function loadMyUploads(){
  const list=el('myUploadsList'),notice=el('uploadsNotice');
  if(!currentUser){list.innerHTML='';notice.textContent='Please log in to view your uploads.';return;}
  notice.textContent='Loading your uploads...';list.innerHTML='';
- const {data:rows,error}=await supabase.from('videos').select('id,title,description,tags,storage_path,status,visibility,created_at').eq('uploader_id',currentUser.id).order('created_at',{ascending:false});
+ const {data:rows,error}=await supabase.from('videos').select('id,title,description,tags,storage_path,thumbnail_path,status,visibility,created_at').eq('uploader_id',currentUser.id).order('created_at',{ascending:false});
  if(error){notice.textContent='Could not load uploads: '+error.message;return;}
  if(!rows||!rows.length){notice.textContent='No uploads found yet.';return;}
  for(const item of rows){
@@ -648,6 +648,33 @@ async function loadMyUploads(){
   const title=document.createElement('strong');title.textContent=item.title||'Untitled media';
   const meta=document.createElement('p');meta.className='muted';meta.textContent='Status: '+item.status+' · Visibility: '+item.visibility+' · '+new Date(item.created_at).toLocaleString();
   card.append(title,meta);
+  const isMusic=/\\.(mp3|m4a|aac|wav|ogg|opus|flac)$/i.test(item.storage_path||'');
+  if(isMusic){
+   const coverWrap=document.createElement('div');coverWrap.className='music-artwork';coverWrap.style.width='min(100%,180px)';
+   if(item.thumbnail_path){const {data:coverData}=await supabase.storage.from('vexora-videos').createSignedUrl(item.thumbnail_path,3600);if(coverData?.signedUrl){const coverImg=document.createElement('img');coverImg.src=coverData.signedUrl;coverImg.alt=(item.title||'Song')+' cover art';coverWrap.append(coverImg);}}
+   if(!coverWrap.childElementCount){const fallback=document.createElement('div');fallback.className='music-artwork-fallback';fallback.textContent='♫';coverWrap.append(fallback);}
+   card.append(coverWrap);
+   const coverLabel=document.createElement('label');coverLabel.textContent=item.thumbnail_path?'Change song cover photo':'Add song cover photo';
+   const coverInput=document.createElement('input');coverInput.type='file';coverInput.accept='image/jpeg,image/png,image/webp';coverInput.style.display='block';coverInput.style.margin='8px 0';
+   const coverSave=document.createElement('button');coverSave.type='button';coverSave.className='btn secondary';coverSave.textContent=item.thumbnail_path?'Update cover photo':'Save cover photo';
+   const coverStatus=document.createElement('small');coverStatus.className='muted';coverStatus.style.display='block';
+   coverSave.addEventListener('click',async()=>{
+    const image=coverInput.files?.[0];if(!image){coverStatus.textContent='Choose a JPG, PNG or WebP image first.';return;}
+    if(!['image/jpeg','image/png','image/webp'].includes(image.type)||image.size>5*1024*1024){coverStatus.textContent='Cover must be JPG, PNG or WebP and 5 MB or smaller.';return;}
+    coverSave.disabled=true;coverStatus.textContent='Uploading cover…';
+    const ext=image.type==='image/png'?'png':image.type==='image/webp'?'webp':'jpg';
+    const newPath=currentUser.id+'/'+Date.now()+'_music_cover.'+ext;
+    try{
+     await uploadFileWithProgress(newPath,image,(loaded,total)=>{coverStatus.textContent='Uploading cover… '+Math.round(loaded/total*100)+'%';});
+     const {error:updateError}=await supabase.from('videos').update({thumbnail_path:newPath}).eq('id',item.id).eq('uploader_id',currentUser.id);
+     if(updateError){await supabase.storage.from('vexora-videos').remove([newPath]);throw updateError;}
+     if(item.thumbnail_path)await supabase.storage.from('vexora-videos').remove([item.thumbnail_path]);
+     coverStatus.textContent='Cover photo saved.';
+     await loadMyUploads();if(activeFeedMode==='music')loadHomeFeed('music',true);
+    }catch(err){coverStatus.textContent='Could not save cover: '+(err.message||'Please try again.');coverSave.disabled=false;}
+   });
+   coverLabel.append(coverInput);card.append(coverLabel,coverSave,coverStatus);
+  }
   if(item.status==='pending'||item.status==='quarantined'){
    const pendingNote=document.createElement('p');pendingNote.className='muted';pendingNote.textContent='This older upload was held by the previous approval workflow. You can publish it now or keep it private.';
    card.append(pendingNote);
