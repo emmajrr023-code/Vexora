@@ -87,6 +87,10 @@ document.querySelectorAll('.app-nav button').forEach(button=>button.addEventList
 $('goUpload').addEventListener('click',()=>{document.querySelector('[data-page="homePage"]').click();$('upload').scrollIntoView({behavior:'smooth'});});
 $('uploadFromUploads').addEventListener('click',()=>{document.querySelector('[data-page="homePage"]').click();$('upload').scrollIntoView({behavior:'smooth'});setTimeout(()=>$('mediaFiles').click(),250);});
 const settingIds=['themeSetting','languageSetting','voiceSetting','privacySetting'];settingIds.forEach(id=>{const saved=localStorage.getItem('vexora_'+id);if(saved&&Array.from($(id).options).some(o=>o.value===saved||o.text===saved))$(id).value=saved;$(id).addEventListener('change',e=>localStorage.setItem('vexora_'+id,e.target.value));});
+$('privacySetting').addEventListener('change',e=>$('visibility').value=e.target.value.toLowerCase());
+$('voiceSetting').addEventListener('change',e=>$('voiceGender').value=e.target.value.toLowerCase());
+$('languageSetting').addEventListener('change',e=>{const value=e.target.value;const voiceOption=Array.from($('voiceLanguage').options).find(o=>o.text===value);if(voiceOption)$('voiceLanguage').value=voiceOption.value;if(value==='हिन्दी'&&!hindi)$('langBtn').click();else if(value==='English'&&hindi)$('langBtn').click();});
+$('visibility').value=$('privacySetting').value.toLowerCase();$('voiceGender').value=$('voiceSetting').value.toLowerCase();
 $('themeSetting').addEventListener('change',e=>{const light=e.target.value==='light';document.body.style.background=light?'#f4f4f7':'#101014';document.body.style.color=light?'#17171d':'#f7f7fb';document.querySelectorAll('.panel').forEach(p=>p.style.background=light?'#fff':'#1b1b23');});
 if($('themeSetting').value==='light'){$('themeSetting').dispatchEvent(new Event('change'));}
 
@@ -146,10 +150,16 @@ el('authSubmit').addEventListener('click',async()=>{
  }catch(error){authMessage(error.message||'Authentication failed.');}
  finally{el('authSubmit').disabled=false;}
 });
+function clearPrivateViews(){
+ el('profileName').value='';el('profileBio').value='';el('profileNamePreview').textContent='Vexora User';el('avatarPreview').textContent='V';
+ el('myUploadsList').replaceChildren();el('moderationHistory').replaceChildren();
+ el('profileNotice').textContent='Log in to view and update your private profile.';el('uploadsNotice').textContent='Log in to view your private uploads.';
+ document.querySelector('[data-page="homePage"]').click();
+}
 async function loadAccount(){
  const {data:{user}}=await supabase.auth.getUser();currentUser=user;window.vexoraCurrentUser=user||null;
  el('adminNav').hidden=true;
- if(!user){window.vexoraIsAdmin=false;el('loginBtn').textContent='Login';el('profileNotice').textContent='Log in to view and update your private profile.';el('uploadsNotice').textContent='Log in to view your private uploads.';return;}
+ if(!user){window.vexoraIsAdmin=false;el('loginBtn').textContent='Login';clearPrivateViews();return;}
  const {data:isAdmin}=await supabase.rpc('is_admin');window.vexoraIsAdmin=isAdmin===true;if(window.vexoraIsAdmin)el('adminNav').hidden=false;
  el('loginBtn').textContent='Logout';
  const {data,error}=await supabase.from('profiles').select('display_name,bio').eq('id',user.id).maybeSingle();
@@ -162,7 +172,7 @@ async function loadAccount(){
 el('loginBtn').addEventListener('click',async()=>{
  if(!currentUser){openAuth();return;}
  const {error}=await supabase.auth.signOut();if(error){alert(error.message);return;}
- currentUser=null;window.vexoraCurrentUser=null;el('loginBtn').textContent='Login';el('profileName').value='';el('profileBio').value='';el('profileNamePreview').textContent='Vexora User';el('avatarPreview').textContent='V';
+ currentUser=null;window.vexoraCurrentUser=null;el('loginBtn').textContent='Login';clearPrivateViews();
 });
 el('uploadMediaBtn').addEventListener('click',async()=>{
  const files=Array.from(el('mediaFiles').files||[]);
@@ -266,7 +276,7 @@ el('saveProfile').addEventListener('click',async()=>{
  if(error){alert('Profile save failed: '+error.message);return;}
  el('profileNamePreview').textContent=display_name||'Vexora User';el('avatarPreview').textContent=(display_name||'V')[0].toUpperCase();el('profileNotice').textContent='Profile saved to your Vexora account.';
 });
-supabase.auth.onAuthStateChange((_event,session)=>{currentUser=session?.user||null;window.vexoraCurrentUser=currentUser;el('loginBtn').textContent=currentUser?'Logout':'Login';if(session?.user)loadAccount();else{window.vexoraIsAdmin=false;el('adminNav').hidden=true;el('profileNotice').textContent='Log in to view and update your private profile.';el('uploadsNotice').textContent='Log in to view your private uploads.';}});
+supabase.auth.onAuthStateChange((_event,session)=>{currentUser=session?.user||null;window.vexoraCurrentUser=currentUser;el('loginBtn').textContent=currentUser?'Logout':'Login';if(session?.user){window.setTimeout(()=>loadAccount(),0);}else{window.vexoraIsAdmin=false;el('adminNav').hidden=true;clearPrivateViews();}});
 loadAccount();
 </script>
 </body></html>
