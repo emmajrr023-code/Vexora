@@ -719,7 +719,30 @@ const item=(r)=>{const entity=type==='top_creators'?profiles[r.entity_id]:videos
 const medals=['🥇','🥈','🥉'];$('lbPodium').innerHTML=rows.slice(0,3).map((r,i)=>{const x=item(r);return '<div class="lb-person '+(i===0?'first':'')+'"><div class="lb-medal">'+medals[i]+'</div>'+x.avatar+'<strong>'+esc(x.title)+'</strong><small>'+esc(x.sub)+'</small><div class="lb-score">'+score(r.score)+' pts</div></div>';}).join('');
 $('lbRows').innerHTML=rows.slice(3).map(r=>{const x=item(r);return '<div class="lb-row"><div class="lb-rank">#'+r.rank+'</div><div class="lb-main">'+x.avatar+'<div style="min-width:0"><strong>'+esc(x.title)+'</strong><small>'+esc(x.sub)+' · '+movement(r)+'</small></div></div><div class="lb-value">'+score(r.score)+'<br><small>pts</small></div></div>';}).join('')|| (rows.length?'':'<div class="lb-empty">Your next favorite creator could be here. Rankings appear as VEXORA activity grows.</div>');
 }
-async function loadCategories(){const {data}=await lbClient.from('categories').select('id,name').order('name');categories=data||[];$('lbCategory').innerHTML='<option value="">All categories</option>'+categories.map(c=>'<option value="'+esc(c.id)+'">'+esc(c.name)+'</option>').join('');}
+async function loadCategories(){
+const fallbackCategories=[
+{id:'f5e342bd-75d0-4be4-b3a9-bf65f3cc9c17',name:'Art & Design'},
+{id:'c4416e64-87c3-40b2-b58a-2bf6030c3050',name:'Business'},
+{id:'543b6f6d-c18d-4f2c-a628-a96746b6ace0',name:'Comedy'},
+{id:'6abe90c4-3176-4a69-912c-a1084915d5da',name:'Education'},
+{id:'8ede4a17-00eb-48a9-9d96-96df3543a0ae',name:'Entertainment'},
+{id:'91871ae5-6d1e-4576-a40a-50cad6f2cb3a',name:'Fashion'},
+{id:'1fe78d7f-d7ba-458f-adb0-55c47b6b8eb5',name:'Film & TV'},
+{id:'04408bf9-8248-49e3-b4af-84f050ae6673',name:'Food'},
+{id:'0b09e146-e3a4-4060-8a6d-d477b8883faa',name:'Gaming'},
+{id:'0a55b039-d746-4ed9-820c-3b3d8b091694',name:'Health & Fitness'},
+{id:'2fb9e7cd-804d-46ad-8187-0b22120dad9e',name:'Lifestyle'},
+{id:'5395b334-c49e-4275-af89-e8122e27ab22',name:'Music'},
+{id:'eb0c20c1-76bf-464b-bcd7-bcae06f197c8',name:'News'},
+{id:'10bf585b-6c12-4a9e-ba38-90107b17cea1',name:'Science'},
+{id:'00aac356-3637-44cc-bda0-add3b20b3c52',name:'Sports'},
+{id:'213039de-de8e-4fac-8418-7986890a7a0f',name:'Technology'},
+{id:'a601a569-76e3-48d5-a45d-7c437f81456f',name:'Travel'}
+];
+const {data,error}=await lbClient.from('categories').select('id,name').order('name');
+categories=!error&&data&&data.length>=fallbackCategories.length?data:fallbackCategories;
+$('lbCategory').innerHTML='<option value="">All Categories</option>'+categories.map(c=>'<option value="'+esc(c.id)+'">'+esc(c.name)+'</option>').join('');
+}
 document.querySelectorAll('[data-lb-type]').forEach(b=>b.addEventListener('click',()=>{type=b.dataset.lbType;document.querySelectorAll('[data-lb-type]').forEach(x=>x.classList.toggle('active',x===b));$('lbCategory').style.display=type==='top_videos'?'':'none';load();}));$('lbTimeframe').addEventListener('change',load);$('lbCategory').addEventListener('change',load);loadCategories().then(load);})();
 </script>
 
