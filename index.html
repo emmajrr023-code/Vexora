@@ -64,7 +64,7 @@ main.wrap{padding:14px 12px 92px;margin:0;width:100%}
 </style>
 </head>
 <body>
-<header class="top"><div class="logo">VEXORA</div><form class="top-search" id="topSearchForm" role="search"><input id="headerSearchInput" type="search" placeholder="Search videos, creators and topics" aria-label="Search Vexora"><button id="searchTopBtn" type="submit" aria-label="Search">⌕</button></form><button class="btn secondary" id="langBtn" type="button">हिंदी</button><button class="btn primary" id="loginBtn" type="button">Sign in</button></header>
+<header class="top"><div class="logo">VEXORA</div><form class="top-search" id="topSearchForm" role="search"><input id="headerSearchInput" type="search" placeholder="Search videos, creators and topics" aria-label="Search Vexora"><button id="searchTopBtn" type="submit" aria-label="Search">⌕</button></form><button class="btn secondary" id="langBtn" type="button">हिंदी</button><button class="btn secondary" id="notificationsBtn" type="button">Alerts</button><button class="btn primary" id="loginBtn" type="button">Sign in</button></header>
 <main class="wrap">
 <div id="homePage" class="page active">
 <section class="hero"><div class="eyebrow" id="eyebrow">AI • VIDEO • PHOTO</div><h1 id="headline">Create. Share. Stream.</h1><p id="intro">Your space for AI conversations, photos and high-quality video streaming—in one place.</p><div class="row"><button class="btn primary" onclick="document.getElementById('upload').scrollIntoView({behavior:'smooth'})" id="uploadCta">Upload media</button><button class="btn secondary" onclick="document.getElementById('assistant').scrollIntoView({behavior:'smooth'})" id="aiCta">Talk to AI</button></div></section>
@@ -84,13 +84,13 @@ main.wrap{padding:14px 12px 92px;margin:0;width:100%}
 <div class="setting-row"><label for="privacySetting">Default media privacy</label><select id="privacySetting"><option>Private</option><option>Public</option></select></div>
 <p class="notice">These are interface preferences for now. Account sync, full translation, and AI voice output need their backend services.</p></div></section>
 <section id="explorePage" class="page"><div class="page-placeholder"><h2>Explore</h2><p>Discover videos and creators across Vexora.</p></div></section>
-<section id="subscriptionsPage" class="page"><div class="page-placeholder"><h2>Subscriptions</h2><p>New videos from creators you follow will appear here.</p></div></section>
-<section id="libraryPage" class="page"><div class="page-placeholder"><h2>Your Library</h2><p>Your saved videos, playlists and uploads will appear here.</p></div></section>
-<section id="historyPage" class="page"><div class="page-placeholder"><h2>Watch History</h2><p>Your recently watched videos will appear here.</p></div></section>
+<section id="subscriptionsPage" class="page"><h2>Subscriptions</h2><div id="subscriptionsList" class="page-placeholder">Sign in to manage your subscriptions.</div></section>
+<section id="libraryPage" class="page"><h2>Your Library</h2><div class="panel"><h3>Watch Later</h3><div id="watchLaterList"></div></div><div class="panel"><h3>Playlists</h3><div class="row"><input id="playlistName" placeholder="New playlist name" maxlength="80"><button class="btn primary" id="createPlaylist" type="button">Create playlist</button></div><div id="playlistsList"></div></div></section>
+<section id="historyPage" class="page"><h2>Watch History</h2><div id="watchHistoryList" class="page-placeholder">Sign in to see your watch history.</div></section>
 </main>
 <nav class="app-nav" aria-label="Main navigation">
 <button class="active" data-page="homePage"><span>⌂</span>Home</button><button data-page="explorePage"><span>⌕</span>Explore</button><button data-page="subscriptionsPage"><span>▤</span>Subscriptions</button><button data-page="libraryPage"><span>▣</span>Library</button><button data-page="historyPage"><span>◷</span>History</button><button data-page="uploadsPage"><span>⇧</span>Uploads</button><button data-page="profilePage"><span>●</span>You</button><button data-page="settingsPage"><span>⚙</span>Settings</button><button data-page="adminPage" id="adminNav" hidden><span>🛡</span>Review</button></nav>
-<div id="authModal" style="display:none;position:fixed;inset:0;z-index:30;background:#000b;padding:18px;overflow:auto">
+<div id="notificationsPanel" hidden style="position:fixed;z-index:40;top:72px;right:16px;width:min(380px,calc(100vw - 32px));max-height:70vh;overflow:auto;background:#19191d;border:1px solid #444;border-radius:14px;padding:14px"><div class="row" style="justify-content:space-between"><strong>Notifications</strong><button id="closeNotifications" type="button">Close</button></div><div id="notificationsList"></div></div><div id="authModal" style="display:none;position:fixed;inset:0;z-index:30;background:#000b;padding:18px;overflow:auto">
  <div class="panel" style="max-width:440px;margin:8vh auto">
   <div class="row" style="justify-content:space-between"><h2 id="authTitle">Vexora Login</h2><button class="btn secondary" id="closeAuth" type="button">✕</button></div>
   <div class="field"><label for="authEmail">Email</label><input id="authEmail" type="email" autocomplete="email" placeholder="you@example.com"></div>
@@ -195,7 +195,7 @@ async function loadHomeFeed(term='',reset=true){
  if(!rows?.length){feedDone=true;if(feedOffset===0){const p=document.createElement('div');p.className='feed-empty';p.textContent='No public videos yet. Be the first to share a video on Vexora.';grid.append(p);}feedLoading=false;return;}
  feedOffset+=rows.length;if(rows.length<24)feedDone=true;
  const ids=[...new Set(rows.map(x=>x.uploader_id).filter(Boolean))];
- const {data:channels}=await supabase.rpc('get_public_channel_profiles',{p_ids:ids});
+ const {data:channels}=await supabase.from('channel_public_profiles').select('id,display_name,avatar_url,banner_url').in('id',ids);
  const channelMap=new Map((channels||[]).map(x=>[x.id,x]));
  for(const item of rows){
   const card=document.createElement('article');card.className='feed-card';card.dataset.videoId=item.id;
@@ -223,9 +223,10 @@ async function loadHomeFeed(term='',reset=true){
   const dislikeBtn=document.createElement('button');dislikeBtn.textContent='👎 '+(dislikes.count||0);dislikeBtn.setAttribute('aria-pressed',String(disliked));
   likeBtn.addEventListener('click',async()=>{if(!currentUser){openAuth();return;}if(liked){await supabase.from('video_likes').delete().eq('video_id',item.id).eq('user_id',currentUser.id);liked=false;}else{await supabase.from('video_dislikes').delete().eq('video_id',item.id).eq('user_id',currentUser.id);await supabase.from('video_likes').insert({video_id:item.id,user_id:currentUser.id});liked=true;disliked=false;}likeBtn.setAttribute('aria-pressed',String(liked));likeBtn.textContent='👍 '+((await supabase.from('video_likes').select('*',{count:'exact',head:true}).eq('video_id',item.id)).count||0);dislikeBtn.setAttribute('aria-pressed',String(disliked));});
   dislikeBtn.addEventListener('click',async()=>{if(!currentUser){openAuth();return;}if(disliked){await supabase.from('video_dislikes').delete().eq('video_id',item.id).eq('user_id',currentUser.id);disliked=false;}else{await supabase.from('video_likes').delete().eq('video_id',item.id).eq('user_id',currentUser.id);await supabase.from('video_dislikes').insert({video_id:item.id,user_id:currentUser.id});disliked=true;liked=false;}dislikeBtn.setAttribute('aria-pressed',String(disliked));dislikeBtn.textContent='👎 '+((await supabase.from('video_dislikes').select('*',{count:'exact',head:true}).eq('video_id',item.id)).count||0);likeBtn.setAttribute('aria-pressed',String(liked));});
-  const laterBtn=document.createElement('button');laterBtn.textContent='＋ Watch later';laterBtn.addEventListener('click',async()=>{if(!currentUser){openAuth();return;}const {error}=await supabase.from('watch_later').upsert({user_id:currentUser.id,video_id:item.id});laterBtn.textContent=error?'Try again':'✓ Saved';});
+  const subscribeBtn=document.createElement('button');subscribeBtn.textContent='Subscribe';if(currentUser&&item.uploader_id===currentUser.id)subscribeBtn.disabled=true;else if(currentUser){const {data:sub}=await supabase.from('subscriptions').select('channel_id').eq('subscriber_id',currentUser.id).eq('channel_id',item.uploader_id).maybeSingle();if(sub)subscribeBtn.textContent='Subscribed';}subscribeBtn.addEventListener('click',async()=>{if(!currentUser){openAuth();return;}if(subscribeBtn.textContent==='Subscribed'){await supabase.from('subscriptions').delete().eq('subscriber_id',currentUser.id).eq('channel_id',item.uploader_id);subscribeBtn.textContent='Subscribe';}else{const {error}=await supabase.from('subscriptions').insert({subscriber_id:currentUser.id,channel_id:item.uploader_id});if(!error)subscribeBtn.textContent='Subscribed';}});
+  const laterBtn=document.createElement('button');laterBtn.textContent='＋ Watch later';laterBtn.addEventListener('click',async()=>{if(!currentUser){openAuth();return;}const {error}=await supabase.from('watch_later').insert({user_id:currentUser.id,video_id:item.id});laterBtn.textContent=error?(error.code==='23505'?'✓ Saved':'Try again'):'✓ Saved';});
   const shareBtn=document.createElement('button');shareBtn.textContent='↗ Share';shareBtn.addEventListener('click',async()=>{const url=location.origin+'/?video='+item.id;if(navigator.share){try{await navigator.share({title:item.title||'Vexora video',url});}catch(e){}}else{await navigator.clipboard?.writeText(url);shareBtn.textContent='✓ Link copied';}});
-  actions.append(likeBtn,dislikeBtn,laterBtn,shareBtn);card.append(actions);
+  actions.append(likeBtn,dislikeBtn,subscribeBtn,laterBtn,shareBtn);card.append(actions);
   const comments=document.createElement('details');comments.className='feed-comments';const summary=document.createElement('summary');summary.textContent='Comments';comments.append(summary);
   const list=document.createElement('div');const commentInput=document.createElement('textarea');commentInput.maxLength=2000;commentInput.placeholder='Add a comment…';const post=document.createElement('button');post.textContent='Post comment';post.addEventListener('click',async()=>{if(!currentUser){openAuth();return;}const content=commentInput.value.trim();if(!content)return;post.disabled=true;const {error}=await supabase.from('comments').insert({video_id:item.id,user_id:currentUser.id,content,status:'pending'});post.disabled=false;if(error){commentInput.placeholder='Could not post: '+error.message;return;}commentInput.value='';commentInput.placeholder='Comment submitted for review.';});
   comments.addEventListener('toggle',async()=>{if(!comments.open||comments.dataset.loaded)return;comments.dataset.loaded='1';const {data}=await supabase.from('comments').select('id,parent_id,user_id,content,created_at').eq('video_id',item.id).eq('status','approved').order('created_at',{ascending:true}).limit(100);const roots=(data||[]).filter(c=>!c.parent_id);for(const c of roots){renderComment(c,false);(data||[]).filter(r=>r.parent_id===c.id).forEach(r=>renderComment(r,true));}});
@@ -234,6 +235,45 @@ async function loadHomeFeed(term='',reset=true){
  }
  feedLoading=false;
 }
+async function loadSubscriptions(){
+ const out=el('subscriptionsList');if(!currentUser){out.textContent='Sign in to view channels you follow.';return;}
+ const {data:rows,error}=await supabase.from('subscriptions').select('channel_id,created_at').eq('subscriber_id',currentUser.id).order('created_at',{ascending:false});
+ if(error){out.textContent='Could not load subscriptions.';return;}out.replaceChildren();
+ if(!rows?.length){out.textContent='You have not subscribed to any channels yet.';return;}
+ const ids=rows.map(x=>x.channel_id);const {data:profiles}=await supabase.from('channel_public_profiles').select('id,display_name,avatar_url').in('id',ids);
+ for(const p of profiles||[]){const row=document.createElement('div');row.className='feed-meta';const name=document.createElement('strong');name.textContent=p.display_name||'Vexora creator';const btn=document.createElement('button');btn.textContent='Unsubscribe';btn.addEventListener('click',async()=>{await supabase.from('subscriptions').delete().eq('subscriber_id',currentUser.id).eq('channel_id',p.id);loadSubscriptions();});row.append(name,btn);out.append(row);}
+}
+async function loadLibrary(){
+ if(!currentUser){el('watchLaterList').textContent='Sign in to view saved videos.';el('playlistsList').textContent='Sign in to manage playlists.';return;}
+ const {data:saved}=await supabase.from('watch_later').select('video_id,created_at,videos(id,title,created_at)').eq('user_id',currentUser.id).order('created_at',{ascending:false});
+ const later=el('watchLaterList');later.replaceChildren();for(const x of saved||[]){const p=document.createElement('p');p.textContent=x.videos?.title||'Saved video';const remove=document.createElement('button');remove.textContent='Remove';remove.addEventListener('click',async()=>{await supabase.from('watch_later').delete().eq('user_id',currentUser.id).eq('video_id',x.video_id);loadLibrary();});later.append(p,remove);}
+ if(!saved?.length)later.textContent='No videos saved yet.';
+ const {data:lists}=await supabase.from('playlists').select('id,name,is_public,created_at').eq('user_id',currentUser.id).order('created_at',{ascending:false});
+ const box=el('playlistsList');box.replaceChildren();for(const p of lists||[]){const row=document.createElement('p');row.textContent=p.name+' · '+(p.is_public?'Public':'Private');box.append(row);}if(!lists?.length)box.textContent='Create your first playlist.';
+}
+async function loadHistory(){
+ const out=el('watchHistoryList');if(!currentUser){out.textContent='Sign in to see your watch history.';return;}
+ const {data:rows,error}=await supabase.from('watch_history').select('watched_at,position_seconds,completed,videos(title)').eq('user_id',currentUser.id).order('watched_at',{ascending:false}).limit(100);
+ if(error){out.textContent='Could not load watch history.';return;}out.replaceChildren();for(const x of rows||[]){const p=document.createElement('p');p.textContent=(x.videos?.title||'Video')+' · '+new Date(x.watched_at).toLocaleString()+(x.completed?' · Completed':'');out.append(p);}if(!rows?.length)out.textContent='Your watch history is empty.';
+}
+async function loadNotifications(){
+ const out=el('notificationsList');if(!currentUser){out.textContent='Sign in to see notifications.';return;}
+ const {data:rows,error}=await supabase.from('notifications').select('id,message,notification_type,created_at,read_at').eq('user_id',currentUser.id).order('created_at',{ascending:false}).limit(30);
+ if(error){out.textContent='Notifications are unavailable.';return;}out.replaceChildren();
+ for(const n of rows||[]){const row=document.createElement('p');row.textContent=n.message+' · '+new Date(n.created_at).toLocaleString();row.style.opacity=n.read_at?'.55':'1';row.addEventListener('click',async()=>{if(!n.read_at)await supabase.from('notifications').update({read_at:new Date().toISOString()}).eq('id',n.id);row.style.opacity='.55';});out.append(row);}if(!rows?.length)out.textContent='You are all caught up.';
+}
+let notificationChannel=null;
+async function connectNotifications(){
+ if(notificationChannel){await supabase.removeChannel(notificationChannel);notificationChannel=null;}
+ if(!currentUser)return;
+ notificationChannel=supabase.channel('vexora-notifications-'+currentUser.id).on('postgres_changes',{event:'INSERT',schema:'public',table:'notifications',filter:'user_id=eq.'+currentUser.id},()=>loadNotifications()).subscribe();
+}
+el('notificationsBtn').addEventListener('click',()=>{el('notificationsPanel').hidden=!el('notificationsPanel').hidden;if(!el('notificationsPanel').hidden)loadNotifications();});
+el('closeNotifications').addEventListener('click',()=>el('notificationsPanel').hidden=true);
+el('createPlaylist').addEventListener('click',async()=>{if(!currentUser){openAuth();return;}const name=el('playlistName').value.trim();if(!name)return;const {error}=await supabase.from('playlists').insert({user_id:currentUser.id,name,is_public:false});if(error){alert('Playlist could not be created: '+error.message);return;}el('playlistName').value='';loadLibrary();});
+document.querySelector('[data-page="subscriptionsPage"]').addEventListener('click',loadSubscriptions);
+document.querySelector('[data-page="libraryPage"]').addEventListener('click',loadLibrary);
+document.querySelector('[data-page="historyPage"]').addEventListener('click',loadHistory);
 async function recordWatch(videoId,video,completed){
  if(!currentUser)return;
  const {error}=await supabase.from('watch_history').upsert({user_id:currentUser.id,video_id:videoId,watched_at:new Date().toISOString(),position_seconds:Math.floor(video.currentTime||0),duration_seconds:Number.isFinite(video.duration)?Math.floor(video.duration):null,completed},{onConflict:'user_id,video_id'});
@@ -279,7 +319,7 @@ function clearPrivateViews(){
  document.querySelector('[data-page="homePage"]').click();
 }
 async function loadAccount(){
- const {data:{user}}=await supabase.auth.getUser();currentUser=user;window.vexoraCurrentUser=user||null;
+ const {data:{user}}=await supabase.auth.getUser();currentUser=user;window.vexoraCurrentUser=user||null;await connectNotifications();
  el('adminNav').hidden=true;
  if(!user){window.vexoraIsAdmin=false;el('loginBtn').textContent='Login';clearPrivateViews();return;}
  const {data:isAdmin}=await supabase.rpc('is_admin');window.vexoraIsAdmin=isAdmin===true;if(window.vexoraIsAdmin)el('adminNav').hidden=false;
