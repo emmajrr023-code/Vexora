@@ -452,6 +452,33 @@ async function loadAdminQueue(){
   (appeals||[]).forEach(a=>{const p=document.createElement('p');p.textContent='Appeal ('+a.status+'): '+a.reason;card.append(p);const resolve=document.createElement('button');resolve.className='btn secondary';resolve.textContent='Mark appeal reviewed';resolve.addEventListener('click',async()=>{const {error}=await supabase.from('video_appeals').update({status:'reviewed',resolved_at:new Date().toISOString()}).eq('id',a.id);notice.textContent=error?error.message:'Appeal marked reviewed.';if(!error)loadAdminQueue();});card.append(resolve);});
   out.append(card);
  }
+ const [pendingComments,openReports]=await Promise.all([
+  supabase.from('comments').select('id,video_id,user_id,content,created_at').eq('status','pending').order('created_at',{ascending:true}).limit(100),
+  supabase.from('reports').select('id,video_id,reason,details,status,created_at').in('status',['pending','reviewed']).order('created_at',{ascending:true}).limit(100)
+ ]);
+ const commentPanel=document.createElement('section');commentPanel.className='panel';const ch=document.createElement('h3');ch.textContent='Pending comments';commentPanel.append(ch);
+ for(const c of pendingComments.data||[]){
+  const row=document.createElement('div');row.className='admin-actions';const txt=document.createElement('p');txt.textContent=c.content;row.append(txt);
+  for(const [status,label] of [['approved','Approve'],['rejected','Reject']]){
+   const b=document.createElement('button');b.textContent=label;
+   b.addEventListener('click',async()=>{const {error}=await supabase.from('comments').update({status}).eq('id',c.id);if(error)notice.textContent=error.message;else loadAdminQueue();});
+   row.append(b);
+  }
+  commentPanel.append(row);
+ }
+ if(!(pendingComments.data||[]).length){const p=document.createElement('p');p.textContent='No comments awaiting review.';commentPanel.append(p);}out.append(commentPanel);
+ const reportPanel=document.createElement('section');reportPanel.className='panel';const rh=document.createElement('h3');rh.textContent='User reports';reportPanel.append(rh);
+ for(const r of openReports.data||[]){
+  const row=document.createElement('div');row.className='admin-actions';const txt=document.createElement('p');txt.textContent=r.reason+' · '+(r.details||'')+' · Video: '+(r.video_id||'Not linked');row.append(txt);
+  for(const [status,label] of [['resolved','Resolve'],['dismissed','Dismiss']]){
+   const b=document.createElement('button');b.textContent=label;
+   b.addEventListener('click',async()=>{const {error}=await supabase.from('reports').update({status}).eq('id',r.id);if(error)notice.textContent=error.message;else loadAdminQueue();});
+   row.append(b);
+  }
+  reportPanel.append(row);
+ }
+ if(!(openReports.data||[]).length){const p=document.createElement('p');p.textContent='No open reports.';reportPanel.append(p);}out.append(reportPanel);
+
 }
 el('refreshAdmin').addEventListener('click',loadAdminQueue);
 document.querySelector('[data-page="adminPage"]').addEventListener('click',loadAdminQueue);
