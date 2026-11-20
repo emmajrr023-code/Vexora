@@ -97,7 +97,7 @@ async function searchPublicMedia(){
  const term=input.value.trim();results.replaceChildren();
  if(!term){message.textContent='Type a keyword to search public Vexora media.';return;}
  message.textContent='Searching approved public media...';
- const {data:rows,error}=await supabase.from('videos').select('id,title,description,storage_path,created_at').eq('status','approved').eq('visibility','public').ilike('title','%'+term.replace(/[%_]/g,'')+'%').order('created_at',{ascending:false}).limit(30);
+ const safeTerm=term.replace(/[%,_()]/g,' ').trim();const {data:rows,error}=await supabase.from('videos').select('id,title,description,storage_path,created_at').eq('status','approved').eq('visibility','public').or('title.ilike.%'+safeTerm+'%,description.ilike.%'+safeTerm+'%').order('created_at',{ascending:false}).limit(30);
  if(error){message.textContent='Search failed: '+error.message;return;}
  if(!rows?.length){message.textContent='No public media found for "'+term+'".';return;}
  for(const item of rows){
