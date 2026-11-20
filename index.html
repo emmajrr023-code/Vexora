@@ -839,6 +839,7 @@ import { createClient as createLiveClient } from 'https://esm.sh/@supabase/supab
 const liveDb=createLiveClient('https://retyursehkyhzyyemjyz.supabase.co','sb_publishable_0KZ6Xb7FM0RwYebAdUM3Rw_MAbaqiZQ');
 const liveEl=id=>document.getElementById(id);
 let activeLiveStream=null;
+let lastLiveStatus=null;
 let hlsInstances=[];
 const liveEscape=s=>String(s??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 async function liveInvoke(body){
@@ -922,7 +923,7 @@ async function createVexoraLive(){
  try{
   const title=liveEl('liveTitleInput').value.trim();if(!title)throw new Error('Enter a title for your live stream.');
   const data=await liveInvoke({action:'create',title});
-  activeLiveStream=data.stream;
+  activeLiveStream=data.stream;lastLiveStatus='created';
   liveEl('liveCreatorPanel').hidden=false;liveEl('liveCreatorTitle').textContent=data.stream.title;
   liveEl('liveRtmpsUrl').value=data.rtmps_url;liveEl('liveStreamKey').value=data.stream_key;
   liveEl('liveCreatorState').textContent='Waiting for your broadcaster to connect…';
@@ -938,13 +939,13 @@ async function checkVexoraLive(){
   const data=await liveInvoke({action:'status',stream_id:activeLiveStream.id});
   liveEl('liveCreatorState').textContent=data.status==='live'?'🔴 Your stream is LIVE':'Waiting for OBS to connect…';
   status.textContent=data.status==='live'?'Your broadcast is live on VEXORA.':'Waiting for OBS/RTMPS connection.';
-  await refreshLivePublic();
+  if(lastLiveStatus!==data.status){lastLiveStatus=data.status;await refreshLivePublic();}
  }catch(e){status.textContent=e.message;}
 }
 async function stopVexoraLive(){
  if(!activeLiveStream)return;
  const b=liveEl('stopLiveBtn');b.disabled=true;
- try{await liveInvoke({action:'stop',stream_id:activeLiveStream.id});liveEl('liveCreatorState').textContent='Stream stopped.';liveEl('liveSetupStatus').textContent='Your live input has been disabled. Create a new stream to broadcast again.';liveEl('liveCreatorPanel').hidden=true;activeLiveStream=null;await refreshLivePublic();}
+ try{await liveInvoke({action:'stop',stream_id:activeLiveStream.id});liveEl('liveCreatorState').textContent='Stream stopped.';liveEl('liveSetupStatus').textContent='Your live input has been disabled. Create a new stream to broadcast again.';liveEl('liveCreatorPanel').hidden=true;activeLiveStream=null;lastLiveStatus='ended';await refreshLivePublic();}
  catch(e){liveEl('liveSetupStatus').textContent=e.message;}
  finally{b.disabled=false;}
 }
@@ -956,7 +957,7 @@ liveEl('copyLiveKey')?.addEventListener('click',async()=>{try{await navigator.cl
 document.querySelector('[data-feed-query="live"]')?.addEventListener('click',()=>{refreshLivePublic();});
 liveDb.auth.onAuthStateChange(()=>{if(!liveEl('liveHub')?.hidden)refreshLivePublic();});
 refreshLivePublic();
-setInterval(()=>{if(activeLiveStream)checkVexoraLive();else refreshLivePublic();},20000);
+setInterval(()=>{if(activeLiveStream)checkVexoraLive();},20000);
 </script>
 
 </body></html>
