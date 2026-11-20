@@ -98,6 +98,7 @@ if($('themeSetting').value==='light'){$('themeSetting').dispatchEvent(new Event(
 <script type="module">
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.86.0';
 
+const el=id=>document.getElementById(id);
 const supabase = createClient('https://retyursehkyhzyyemjyz.supabase.co','sb_publishable_0KZ6Xb7FM0RwYebAdUM3Rw_MAbaqiZQ');
 async function searchPublicMedia(){
  const input=el('mediaSearchInput'), results=el('searchResults'), message=el('searchMessage');
@@ -128,7 +129,7 @@ el('searchTopBtn').addEventListener('click',()=>{document.querySelector('[data-p
 el('mediaSearchInput').addEventListener('keydown',event=>{if(event.key==='Enter')searchPublicMedia();});
 
 let authMode='login', currentUser=null;
-const el=id=>document.getElementById(id);
+
 function authMessage(message){el('authMessage').textContent=message;}
 function openAuth(){el('authModal').style.display='block';authMessage('');}
 function setAuthMode(mode){authMode=mode;el('authTitle').textContent=mode==='login'?'Vexora Login':'Create your Vexora account';el('authSubmit').textContent=mode==='login'?'Login':'Sign up';el('authSwitch').textContent=mode==='login'?'Create account':'I already have an account';el('authNameWrap').style.display=mode==='signup'?'grid':'none';el('authPassword').autocomplete=mode==='login'?'current-password':'new-password';authMessage('');}
