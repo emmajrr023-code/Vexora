@@ -18,7 +18,7 @@ VEXORA is a responsive AI and user-generated media website.
 - AI moderation through the `moderate-upload` Supabase Edge Function.
 - Safe media approval, confirmed-violation strikes, quarantine for uncertain files, and a seven-day suspension after three confirmed violations.
 - Public/private visibility enforcement; only approved public media appears in search.
-- My Uploads, moderation history, rejected-media appeals and admin review interface.
+- My Uploads, moderation history, rejected-media appeals and an AI Auto Safety dashboard (no manual admin approval for clear AI decisions).
 - Browser/device speech recognition and speech synthesis where supported.
 - Gemini-powered chat through a server-side Vercel function. The Gemini API key is not exposed in browser code.
 - Theme, language, voice and default privacy preferences stored on the device.
@@ -27,7 +27,7 @@ VEXORA is a responsive AI and user-generated media website.
 
 - Media over 20 MB is currently kept private in quarantine because the moderation function uses inline Gemini inspection. It is not automatically approved.
 - Video playback uses signed Supabase Storage URLs. A dedicated adaptive streaming/CDN service is not configured.
-- The admin review interface requires an account with the `admin` role in `public.user_roles`. No account is currently assigned that role; assign it only after confirming the owner's exact sign-in account.
+- AI moderation automatically approves clearly safe uploads, rejects clearly prohibited uploads, and keeps uncertain, unsupported, oversized, or failed-inspection uploads private. The AI Auto Safety dashboard shows the signed-in user's moderation counts and recent activity. Ambiguous cases are not automatically published.
 - Email confirmation and password security options depend on the Supabase Auth project settings.
 - The leaked-password protection option is currently disabled in Supabase Auth and should be enabled in the dashboard.
 - Voice availability depends on the browser and installed device voices; this is not cloned or custom AI voice generation.
