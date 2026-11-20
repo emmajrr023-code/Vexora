@@ -64,7 +64,7 @@ main.wrap{padding:14px 12px 92px;margin:0;width:100%}
 </style>
 </head>
 <body>
-<header class="top"><div class="logo">VEXORA</div><form class="top-search" id="topSearchForm" role="search"><input id="headerSearchInput" type="search" placeholder="Search videos, creators and topics" aria-label="Search Vexora"><button id="searchTopBtn" type="submit" aria-label="Search">⌕</button></form><button class="btn secondary" id="langBtn" type="button">हिंदी</button><button class="btn secondary" id="notificationsBtn" type="button">Alerts</button><button class="btn primary" id="loginBtn" type="button">Sign in</button></header>
+<header class="top"><div class="logo">VEXORA</div><form class="top-search" id="topSearchForm" role="search"><input id="headerSearchInput" type="search" list="searchSuggestions" placeholder="Search videos, creators and topics" aria-label="Search Vexora"><datalist id="searchSuggestions"></datalist><button id="voiceSearchBtn" type="button" aria-label="Voice search">🎙</button><button id="searchTopBtn" type="submit" aria-label="Search">⌕</button></form><button class="btn secondary" id="langBtn" type="button">हिंदी</button><button class="btn secondary" id="notificationsBtn" type="button">Alerts</button><button class="btn primary" id="loginBtn" type="button">Sign in</button></header>
 <main class="wrap">
 <div id="homePage" class="page active">
 <section class="hero"><div class="eyebrow" id="eyebrow">AI • VIDEO • PHOTO</div><h1 id="headline">Create. Share. Stream.</h1><p id="intro">Your space for AI conversations, photos and high-quality video streaming—in one place.</p><div class="row"><button class="btn primary" onclick="document.getElementById('upload').scrollIntoView({behavior:'smooth'})" id="uploadCta">Upload media</button><button class="btn secondary" onclick="document.getElementById('assistant').scrollIntoView({behavior:'smooth'})" id="aiCta">Talk to AI</button></div></section>
@@ -315,6 +315,21 @@ document.querySelectorAll('[data-feed-query]').forEach(button=>button.addEventLi
 loadHomeFeed('',true);
 const feedObserver=new IntersectionObserver(entries=>{if(entries.some(e=>e.isIntersecting))loadHomeFeed(activeFeedTerm,false);},{rootMargin:'600px'});feedObserver.observe(el('feedSentinel'));
 
+
+let suggestionTimer=null;
+el('headerSearchInput').addEventListener('input',()=>{
+ clearTimeout(suggestionTimer);const term=el('headerSearchInput').value.trim();
+ if(term.length<2){el('searchSuggestions').replaceChildren();return;}
+ suggestionTimer=setTimeout(async()=>{const {data}=await supabase.from('videos').select('title').eq('status','approved').eq('visibility','public').ilike('title',term+'%').limit(8);const list=el('searchSuggestions');list.replaceChildren();for(const x of data||[]){const option=document.createElement('option');option.value=x.title;list.append(option);}},250);
+});
+el('voiceSearchBtn').addEventListener('click',()=>{
+ const Recognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+ if(!Recognition){alert('Voice search is not supported in this browser.');return;}
+ const recognition=new Recognition();recognition.lang='en-IN';recognition.interimResults=false;
+ recognition.onresult=e=>{el('headerSearchInput').value=e.results[0][0].transcript;el('topSearchForm').requestSubmit();};
+ recognition.onerror=()=>alert('Voice search could not start. Please try typing your search.');
+ recognition.start();
+});
 el('topSearchForm').addEventListener('submit',event=>{event.preventDefault();const term=el('headerSearchInput').value.trim();el('mediaSearchInput').value=term;document.querySelector('[data-page="homePage"]').click();el('mediaSearchBtn').click();el('search').scrollIntoView({behavior:'smooth'});});
 el('mediaSearchInput').addEventListener('keydown',event=>{if(event.key==='Enter')searchPublicMedia();});
 
