@@ -551,9 +551,24 @@ async function loadMyUploads(){
   const title=document.createElement('strong');title.textContent=item.title||'Untitled media';
   const meta=document.createElement('p');meta.className='muted';meta.textContent='Status: '+item.status+' · Visibility: '+item.visibility+' · '+new Date(item.created_at).toLocaleString();
   card.append(title,meta);
-  if(item.status==='pending'){
-   const pendingNote=document.createElement('p');pendingNote.className='muted';pendingNote.textContent='AI check did not finish during upload. This video remains private and was not published.';
-   card.append(pendingNote);
+  if(item.status==='pending'||item.status==='quarantined'){
+   const pendingNote=document.createElement('p');pendingNote.className='muted';pendingNote.textContent='This upload is private while its AI safety check is pending. You can retry the check now; it will not be published unless approved.';
+   const retryBtn=document.createElement('button');retryBtn.className='btn primary';retryBtn.type='button';retryBtn.textContent='Retry AI safety check';
+   retryBtn.addEventListener('click',async()=>{
+    retryBtn.disabled=true;retryBtn.textContent='Checking…';pendingNote.textContent='Requesting a fresh AI safety check. Your upload remains private.';
+    try{
+     const {data:review,error:reviewError}=await supabase.functions.invoke('moderate-upload',{body:{video_id:item.id,desired_visibility:'private'}});
+     if(reviewError)throw reviewError;
+     pendingNote.textContent=review?.message||('Safety check status: '+(review?.status||'pending')+'. The video remains private unless approved.');
+     retryBtn.textContent=(review?.status==='approved'||review?.status==='rejected')?'Check completed':'Try again';
+     retryBtn.disabled=false;
+     await loadMyUploads();
+    }catch(retryError){
+     pendingNote.textContent='The safety service is still unavailable. Your video is safe and private. Please retry in a moment. '+(retryError.message||'');
+     retryBtn.textContent='Retry AI safety check';retryBtn.disabled=false;
+    }
+   });
+   card.append(pendingNote,retryBtn);
   }
   if(item.status==='approved'){const edit=document.createElement('button');edit.className='btn secondary';edit.textContent='Edit details';edit.addEventListener('click',async()=>{const nextTitle=prompt('Video title (1–120 characters)',item.title||'');if(nextTitle===null)return;const nextDescription=prompt('Description',item.description||'');if(nextDescription===null)return;const nextTags=prompt('Tags separated by commas',(item.tags||[]).join(', '));if(nextTags===null)return;const nextVisibility=item.status==='pending'?'private':(prompt('Privacy: public, unlisted or private',item.visibility||'private')||item.visibility).toLowerCase();const {error}=await supabase.rpc('update_my_video_metadata',{p_video_id:item.id,p_title:nextTitle,p_description:nextDescription,p_tags:nextTags.split(',').map(x=>x.trim()).filter(Boolean),p_visibility:nextVisibility});notice.textContent=error?'Could not update details: '+error.message:'Video details updated.';if(!error)loadMyUploads();});card.append(edit);}
   if(item.status==='rejected'){
