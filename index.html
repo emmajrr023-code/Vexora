@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#101014">
+<meta name="theme-color" content="#ffffff">
 <title>VEXORA — AI & Media</title>
 <style>
 :root{color-scheme:dark;--bg:#101014;--panel:#1b1b23;--muted:#aaaaba;--line:#343440;--accent:#ff3158}
@@ -71,6 +71,9 @@ html,body{background:#fff!important;color:#171717!important}
 .top-search input{height:48px!important;background:#fff!important;color:#171717!important;border:1px solid #d1d5db!important;border-radius:28px!important;padding:0 20px!important;box-shadow:0 1px 3px #1111}
 #voiceSearchBtn,#searchTopBtn{display:none!important}
 .top-search input::placeholder{color:#737373}
+/* Keep one primary search field; remove duplicate search/voice controls and the old AI voice panel. */
+#assistant,.hero,#aiCta,#voiceSearchBtn,#searchTopBtn,.voice-controls,#voiceBtn,.setting-row:has(#voiceSetting){display:none!important}
+.profile-setting>div{flex:1;min-width:0}.profile-setting button{white-space:nowrap}
 .top .btn.secondary{background:#f3f4f6!important;color:#262626!important}
 .top .btn.primary,.btn.primary{background:#e11d36!important;color:#fff!important}
 main.wrap{background:#fff!important}
@@ -116,9 +119,9 @@ footer{background:#fff!important;color:#626b78!important;border-color:#e5e7eb!im
 <section id="settingsPage" class="page"><h2>Settings</h2><div class="panel">
 <div class="setting-row"><label for="themeSetting">Appearance</label><select id="themeSetting"><option value="light" selected>Light</option></select></div>
 <div class="setting-row" hidden><label for="languageSetting">App language</label><select id="languageSetting"><option>Auto detect</option><option>English</option><option>हिन्दी</option><option>বাংলা</option><option>اردو</option><option>தமிழ்</option><option>తెలుగు</option><option>मराठी</option><option>ગુજરાતી</option><option>ಕನ್ನಡ</option><option>മലയാളം</option><option>ਪੰਜਾਬੀ</option><option>Français</option><option>Español</option><option>Deutsch</option><option>العربية</option><option>中文</option><option>日本語</option></select></div>
-<div class="setting-row"><label for="voiceSetting">AI voice</label><select id="voiceSetting"><option>Female</option><option>Male</option></select></div>
+<div class="setting-row profile-setting"><div><strong>Profile</strong><div class="muted">Edit your display name, bio, profile photo and channel banner.</div></div><button class="btn primary" id="editProfileFromSettings" type="button">Edit profile</button></div>
 <div class="setting-row"><label for="privacySetting">Default media privacy</label><select id="privacySetting"><option>Private</option><option>Public</option></select></div>
-<p class="notice">These are interface preferences for now. Account sync, full translation, and AI voice output need their backend services.</p></div></section>
+<p class="notice">Your profile changes are saved to your signed-in VEXORA account. Keep your default uploads private until you choose to publish approved media.</p></div></section>
 <section id="explorePage" class="page"><div class="page-placeholder"><h2>Explore</h2><p>Discover videos and creators across Vexora.</p></div></section>
 <section id="subscriptionsPage" class="page"><h2>Subscriptions</h2><div id="subscriptionsList" class="page-placeholder">Sign in to manage your subscriptions.</div></section>
 <section id="libraryPage" class="page"><h2>Your Library</h2><div class="panel"><h3>Watch Later</h3><div id="watchLaterList"></div></div><div class="panel"><h3>Playlists</h3><div class="row"><input id="playlistName" placeholder="New playlist name" maxlength="80"><button class="btn primary" id="createPlaylist" type="button">Create playlist</button></div><div id="playlistsList"></div></div></section>
@@ -551,6 +554,7 @@ async function loadAdminQueue(){
 el('refreshAdmin').addEventListener('click',loadAdminQueue);
 document.querySelector('[data-page="adminPage"]').addEventListener('click',loadAdminQueue);
 document.querySelector('[data-page="settingsPage"]').addEventListener('click',async()=>{if(currentUser){const {data}=await supabase.rpc('is_admin');if(data===true){const adminNav=document.querySelector('[data-page="settingsPage"]');adminNav.title='Settings · admin dashboard available below';}}});
+$('editProfileFromSettings').addEventListener('click',()=>document.querySelector('[data-page="profilePage"]').click());
 el('refreshUploads').addEventListener('click',loadMyUploads);
 document.querySelector('[data-page="uploadsPage"]').addEventListener('click',loadMyUploads);
 function renderAvatar(url,name){
