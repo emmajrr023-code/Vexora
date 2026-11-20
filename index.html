@@ -174,7 +174,21 @@ footer{background:#fff!important;color:#626b78!important;border-color:#e5e7eb!im
 <main class="wrap">
 <div id="homePage" class="page active">
 <section class="hero"><div class="eyebrow" id="eyebrow">AI • VIDEO • PHOTO</div><h1 id="headline">Create. Share. Stream.</h1><p id="intro">Your space for AI conversations, photos and high-quality video streaming—in one place.</p><div class="row"><button class="btn primary" onclick="document.getElementById('upload').scrollIntoView({behavior:'smooth'})" id="uploadCta">Upload media</button><button class="btn secondary" onclick="document.getElementById('assistant').scrollIntoView({behavior:'smooth'})" id="aiCta">Talk to AI</button></div></section>
-<section id="search"><h2>Search public media</h2><div class="panel"><div class="searchbar"><input id="mediaSearchInput" type="search" placeholder="Search photos, videos, topics..."><button class="btn primary" id="mediaSearchBtn" type="button">Search</button></div><p class="muted" id="searchMessage">Find approved public photos and videos on Vexora. Private uploads are never shown.</p><div class="search-results" id="searchResults"></div></div><div class="discovery-chips" aria-label="Explore categories"><button class="active" data-feed-query="">All</button><button data-feed-query="music">Music</button><button data-feed-query="videos">Videos</button><button data-feed-query="gaming" class="category-locked" disabled aria-disabled="true" title="Coming soon">🔒 Gaming</button><button data-feed-query="technology" class="category-locked" disabled aria-disabled="true" title="Coming soon">🔒 Technology</button><button data-feed-query="shorts">Short videos</button><button data-feed-query="live">Live</button></div><section id="musicHub" class="panel" hidden style="margin:12px 0"><h2>Music</h2><p class="muted">Listen to tracks shared by creators, or upload your own audio.</p><div class="field"><label for="musicTrackTitle">Song title</label><input id="musicTrackTitle" maxlength="120" placeholder="Enter song title"></div><div class="field"><label for="musicTrackFile">Choose music file</label><input id="musicTrackFile" type="file" accept="audio/*,.mp3,.m4a,.aac,.wav,.ogg,.opus,.flac"></div><div class="field"><label for="musicVisibility">Who can listen?</label><select id="musicVisibility"><option value="public">Public</option><option value="private">Private</option></select></div><div class="row"><button class="btn primary" id="uploadMusicBtn" type="button">Upload Music</button><span class="muted" id="musicUploadStatus">MP3, M4A, AAC, WAV, OGG or FLAC · Max 100 MB</span></div></section><section id="liveHub" class="panel" hidden style="margin:12px 0"><h2>Go Live</h2><p class="muted">Start a live broadcast and let your audience join in real time.</p><button class="btn primary" id="goLiveBtn" type="button">Start Live</button><p class="notice" id="liveSetupStatus">Live broadcasting needs a streaming service and server-side stream keys. This VEXORA project does not have a live-stream service connected yet.</p></section><section id="recommendedSection"><h2>Recommended</h2><div class="feed-grid" id="homeFeed"><div class="feed-empty">Loading videos…</div></div><div id="feedSentinel" aria-hidden="true"></div></section>
+<section id="search"><h2>Search public media</h2><div class="panel"><div class="searchbar"><input id="mediaSearchInput" type="search" placeholder="Search photos, videos, topics..."><button class="btn primary" id="mediaSearchBtn" type="button">Search</button></div><p class="muted" id="searchMessage">Find approved public photos and videos on Vexora. Private uploads are never shown.</p><div class="search-results" id="searchResults"></div></div><div class="discovery-chips" aria-label="Explore categories"><button class="active" data-feed-query="">All</button><button data-feed-query="music">Music</button><button data-feed-query="videos">Videos</button><button data-feed-query="gaming" class="category-locked" disabled aria-disabled="true" title="Coming soon">🔒 Gaming</button><button data-feed-query="technology" class="category-locked" disabled aria-disabled="true" title="Coming soon">🔒 Technology</button><button data-feed-query="shorts">Short videos</button><button data-feed-query="live">Live</button></div><section id="musicHub" class="panel" hidden style="margin:12px 0"><h2>Music</h2><p class="muted">Listen to tracks shared by creators, or upload your own audio.</p><div class="field"><label for="musicTrackTitle">Song title</label><input id="musicTrackTitle" maxlength="120" placeholder="Enter song title"></div><div class="field"><label for="musicTrackFile">Choose music file</label><input id="musicTrackFile" type="file" accept="audio/*,.mp3,.m4a,.aac,.wav,.ogg,.opus,.flac"></div><div class="field"><label for="musicVisibility">Who can listen?</label><select id="musicVisibility"><option value="public">Public</option><option value="private">Private</option></select></div><div class="row"><button class="btn primary" id="uploadMusicBtn" type="button">Upload Music</button><span class="muted" id="musicUploadStatus">MP3, M4A, AAC, WAV, OGG or FLAC · Max 100 MB</span></div></section><section id="liveHub" class="panel" hidden style="margin:12px 0">
+<h2>Go Live on VEXORA</h2>
+<p class="muted">Create your private broadcast input. Use OBS Studio or another RTMPS broadcaster to send your camera or gameplay to VEXORA.</p>
+<div class="field"><label for="liveTitleInput">Live stream title</label><input id="liveTitleInput" maxlength="160" placeholder="What are you streaming?"></div>
+<div class="row"><button class="btn primary" id="goLiveBtn" type="button">Create Live Stream</button><button class="btn secondary" id="refreshLiveBtn" type="button">Refresh status</button></div>
+<p class="notice" id="liveSetupStatus">Connect your broadcaster after creating a stream. Your stream key is private—never share it publicly.</p>
+<div id="liveCreatorPanel" hidden class="panel" style="margin-top:14px">
+<strong id="liveCreatorTitle">Your stream</strong><p class="muted" id="liveCreatorState">Waiting for OBS to connect…</p>
+<div class="field"><label>Server URL (RTMPS)</label><input id="liveRtmpsUrl" readonly></div>
+<div class="field"><label>Stream key — secret</label><input id="liveStreamKey" type="password" readonly autocomplete="off"><div class="row"><button class="btn secondary" id="toggleLiveKey" type="button">Show key</button><button class="btn secondary" id="copyLiveKey" type="button">Copy key</button></div></div>
+<p class="muted">In OBS: Settings → Stream → Service: Custom. Paste the Server URL and Stream key, then click Start Streaming.</p>
+<button class="btn secondary" id="stopLiveBtn" type="button">Stop Live Stream</button>
+</div>
+<h2 style="margin-top:22px">Live now</h2><div id="livePublicList" class="feed-grid"><div class="feed-empty">Loading live streams…</div></div>
+</section><section id="recommendedSection"><h2>Recommended</h2><div class="feed-grid" id="homeFeed"><div class="feed-empty">Loading videos…</div></div><div id="feedSentinel" aria-hidden="true"></div></section>
 </section>
 <section id="upload"><h2 id="uploadTitle">Upload photos & videos</h2><div class="panel"><div class="grid"><div class="field"><label for="mediaFiles" id="chooseLabel">Choose photos or videos</label><input id="mediaFiles" type="file" accept="image/*,video/*" multiple></div><div class="field"><label for="visibility" id="visibilityLabel">Who can see this?</label><select id="visibility"><option value="private">Private — only me</option><option value="public">Public — publish instantly</option></select></div><div class="field"><label for="uploadQuality">Upload quality</label><select id="uploadQuality"><option value="low">Low — smaller file</option><option value="hq" selected>HQ — balanced</option><option value="hd">HD — highest source quality</option></select><small class="muted">Quality choice is saved for this upload; video transcoding is not enabled yet.</small></div></div><div class="field"><label for="uploadTitleInput">Video title</label><input id="uploadTitleInput" maxlength="120" placeholder="Add a title"></div><div class="field"><label for="uploadDescription">Description</label><textarea id="uploadDescription" maxlength="5000" rows="3" placeholder="Tell viewers about this video"></textarea></div><div class="field"><label for="uploadTags">Tags</label><input id="uploadTags" placeholder="Add tags separated by commas"></div><div class="row"><button class="btn secondary" id="previewBtn">Preview selected media</button><button class="btn primary" id="uploadMediaBtn" type="button">Upload selected files</button><span class="muted" id="visibilityHint">Choose Public or Private for each upload. Public media publishes immediately; Private media remains visible only to you. Vexora AI scans in the background and can flag content under platform rules.</span></div><div class="preview" id="preview"></div><div id="uploadProgressWrap" hidden style="margin-top:14px"><div class="row" style="justify-content:space-between"><strong id="uploadProgressLabel">Uploading…</strong><span id="uploadProgressPercent">0%</span></div><div style="height:9px;background:#eee;border-radius:99px;overflow:hidden;margin:8px 0"><div id="uploadProgressBar" style="height:100%;width:0;background:#e11d36;transition:width .2s"></div></div><small class="muted" id="uploadProgressMeta" aria-live="polite">Preparing upload…</small></div><div class="notice" id="uploadNotice">Choose files and upload them securely to your private Vexora storage. Maximum 100 MB per file.</div></div></section>
 <section id="assistant"><h2 id="aiTitle">Vexora AI Assistant</h2><div class="panel"><div class="chatlog" id="chatlog">Hello! Ask Vexora anything. Replies are generated securely by the connected AI service.</div><div class="voice-controls"><label>AI voice language<select id="voiceLanguage"><option value="auto">Auto detect / स्वतः पहचानें</option><option>English</option><option>हिन्दी</option><option>বাংলা</option><option>اردو</option><option>தமிழ்</option><option>తెలుగు</option><option>मराठी</option><option>ગુજરાતી</option><option>ಕನ್ನಡ</option><option>മലയാളം</option><option>ਪੰਜਾਬੀ</option><option>ଓଡ଼ିଆ</option><option>অসমীয়া</option><option>नेपाली</option><option>Français</option><option>Español</option><option>Deutsch</option><option>العربية</option><option>中文</option><option>日本語</option><option>한국어</option><option>Português</option><option>Русский</option><option>Italiano</option><option>Türkçe</option></select></label><label>Voice type<select id="voiceGender"><option value="female">Female voice / महिला आवाज़</option><option value="male">Male voice / पुरुष आवाज़</option></select></label></div><div class="chatrow"><input id="question" placeholder="अपना सवाल लिखें / Ask a question"><button class="btn primary" id="sendBtn">Send</button><button class="btn secondary" id="voiceBtn" type="button">🎙️ Speak</button></div><div class="notice" id="aiNotice">AI replies use the secure server connection. Voice input and spoken replies depend on your browser and device.</div></div></section>
@@ -819,4 +833,73 @@ const recent=await adminDb.from('videos').select('id,title,status,visibility,cre
 }
 ae('refreshOwnerDashboard')?.addEventListener('click',loadOwnerDashboard);document.querySelector('[data-page="adminPage"]')?.addEventListener('click',loadOwnerDashboard);adminDb.auth.onAuthStateChange(()=>setTimeout(loadOwnerDashboard,0));
 </script>
+
+<script type="module">
+import { createClient as createLiveClient } from 'https://esm.sh/@supabase/supabase-js@2.86.0';
+const liveDb=createLiveClient('https://retyursehkyhzyyemjyz.supabase.co','sb_publishable_0KZ6Xb7FM0RwYebAdUM3Rw_MAbaqiZQ');
+const liveEl=id=>document.getElementById(id);
+let activeLiveStream=null;
+let hlsInstances=[];
+const liveEscape=s=>String(s??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+async function liveInvoke(body){
+ const {data:{session}}=await liveDb.auth.getSession();
+ if(!session?.access_token)throw new Error('Please sign in before starting a live stream.');
+ const {data,error}=await liveDb.functions.invoke('vexora-live-stream',{body});
+ if(error)throw new Error(data?.error||error.message||'Live stream request failed.');
+ if(data?.error)throw new Error(data.error);
+ return data;
+}
+async function refreshLivePublic(){
+ const host=liveEl('livePublicList');if(!host)return;
+ hlsInstances.forEach(x=>{try{x.destroy()}catch{}});hlsInstances=[];
+ const {data,error}=await liveDb.from('live_streams').select('id,title,playback_url,created_at').eq('status','live').order('created_at',{ascending:false}).limit(30);
+ if(error){host.innerHTML='<div class="feed-empty">Live streams could not be loaded. Please retry.</div>';return;}
+ if(!data?.length){host.innerHTML='<div class="feed-empty">No creators are live right now. Start a stream and it will appear here.</div>';return;}
+ host.innerHTML=data.map(s=>'<article class="feed-card"><video class="feed-media" controls playsinline muted data-live-playback="'+liveEscape(s.id)+'"></video><div class="feed-meta"><div class="feed-copy"><p class="feed-title">🔴 '+liveEscape(s.title)+'</p><p class="feed-sub">LIVE on VEXORA</p></div></div></article>').join('');
+ const videos=[...host.querySelectorAll('video[data-live-playback]')];
+ const {default:Hls}=await import('https://esm.sh/hls.js@1.5.17');
+ videos.forEach((video,i)=>{const src=data[i].playback_url;if(video.canPlayType('application/vnd.apple.mpegurl'))video.src=src;else if(Hls.isSupported()){const h=new Hls({liveSyncDurationCount:3});h.loadSource(src);h.attachMedia(video);hlsInstances.push(h);}});
+}
+async function createVexoraLive(){
+ const button=liveEl('goLiveBtn'),status=liveEl('liveSetupStatus');
+ button.disabled=true;button.textContent='Creating…';status.textContent='Creating your secure Cloudflare live input…';
+ try{
+  const title=liveEl('liveTitleInput').value.trim();if(!title)throw new Error('Enter a title for your live stream.');
+  const data=await liveInvoke({action:'create',title});
+  activeLiveStream=data.stream;
+  liveEl('liveCreatorPanel').hidden=false;liveEl('liveCreatorTitle').textContent=data.stream.title;
+  liveEl('liveRtmpsUrl').value=data.rtmps_url;liveEl('liveStreamKey').value=data.stream_key;
+  liveEl('liveCreatorState').textContent='Waiting for your broadcaster to connect…';
+  status.textContent='Live input created. Copy the RTMPS details into OBS, then click Start Streaming in OBS.';
+  await refreshLivePublic();
+ }catch(e){status.textContent=e.message||'Could not create live stream.';}
+ finally{button.disabled=false;button.textContent='Create Live Stream';}
+}
+async function checkVexoraLive(){
+ if(!activeLiveStream)return;
+ const status=liveEl('liveSetupStatus');
+ try{
+  const data=await liveInvoke({action:'status',stream_id:activeLiveStream.id});
+  liveEl('liveCreatorState').textContent=data.status==='live'?'🔴 Your stream is LIVE':'Waiting for OBS to connect…';
+  status.textContent=data.status==='live'?'Your broadcast is live on VEXORA.':'Waiting for OBS/RTMPS connection.';
+  await refreshLivePublic();
+ }catch(e){status.textContent=e.message;}
+}
+async function stopVexoraLive(){
+ if(!activeLiveStream)return;
+ const b=liveEl('stopLiveBtn');b.disabled=true;
+ try{await liveInvoke({action:'stop',stream_id:activeLiveStream.id});liveEl('liveCreatorState').textContent='Stream stopped.';liveEl('liveSetupStatus').textContent='Your live input has been disabled. Create a new stream to broadcast again.';liveEl('liveCreatorPanel').hidden=true;activeLiveStream=null;await refreshLivePublic();}
+ catch(e){liveEl('liveSetupStatus').textContent=e.message;}
+ finally{b.disabled=false;}
+}
+liveEl('goLiveBtn')?.addEventListener('click',createVexoraLive);
+liveEl('refreshLiveBtn')?.addEventListener('click',async()=>{await checkVexoraLive();await refreshLivePublic();});
+liveEl('stopLiveBtn')?.addEventListener('click',stopVexoraLive);
+liveEl('toggleLiveKey')?.addEventListener('click',()=>{const key=liveEl('liveStreamKey');const shown=key.type==='text';key.type=shown?'password':'text';liveEl('toggleLiveKey').textContent=shown?'Show key':'Hide key';});
+liveEl('copyLiveKey')?.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(liveEl('liveStreamKey').value);liveEl('copyLiveKey').textContent='Copied';setTimeout(()=>liveEl('copyLiveKey').textContent='Copy key',1800);}catch{liveEl('liveSetupStatus').textContent='Clipboard unavailable. Select and copy the key manually.';}});
+document.querySelector('[data-feed-query="live"]')?.addEventListener('click',()=>{refreshLivePublic();});
+liveDb.auth.onAuthStateChange(()=>{if(!liveEl('liveHub')?.hidden)refreshLivePublic();});
+refreshLivePublic();
+</script>
+
 </body></html>
