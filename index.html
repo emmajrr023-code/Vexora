@@ -318,6 +318,11 @@ async function searchPublicMedia(){
 
 el('mediaSearchBtn').addEventListener('click',searchPublicMedia);
 let feedOffset=0,feedDone=false,feedLoading=false,activeFeedTerm='';
+ const feedVideoRatios=new Map();let activeFeedVideo=null;let feedAutoSwitching=false;
+ function stopOtherFeedVideos(keep=null){document.querySelectorAll('#homeFeed video.feed-media').forEach(v=>{if(v!==keep&&!v.paused){v.pause();}});if(keep)activeFeedVideo=keep;else if(activeFeedVideo&&!activeFeedVideo.paused)activeFeedVideo.pause();}
+ const feedVideoObserver=new IntersectionObserver(entries=>{for(const entry of entries)feedVideoRatios.set(entry.target,entry.isIntersecting?entry.intersectionRatio:0);let best=null,bestRatio=0;for(const [video,ratio] of feedVideoRatios){if(!video.isConnected){feedVideoRatios.delete(video);continue;}if(ratio>bestRatio){best=video;bestRatio=ratio;}}if(best&&bestRatio>=0.6){if(activeFeedVideo!==best||best.paused){stopOtherFeedVideos(best);feedAutoSwitching=true;best.play().catch(()=>{}).finally(()=>{feedAutoSwitching=false;});}}else if(activeFeedVideo){activeFeedVideo.pause();activeFeedVideo=null;}},{threshold:[0,0.25,0.5,0.6,0.75,1]});
+ document.addEventListener('visibilitychange',()=>{if(document.hidden)stopOtherFeedVideos();});
+
 async function loadHomeFeed(term='',reset=true){
  if(feedLoading)return;
  if(reset){feedOffset=0;feedDone=false;activeFeedTerm=term;el('homeFeed').replaceChildren();}
@@ -343,7 +348,7 @@ async function loadHomeFeed(term='',reset=true){
    const isVideo=/\.(mp4|webm|mov|m4v)$/i.test(item.storage_path||'');
    media=document.createElement(isVideo?'video':'img');media.className='feed-media';media.src=signed.signedUrl;
    if(isVideo&&item.thumbnail_path){const {data:thumb}=await supabase.storage.from('vexora-videos').createSignedUrl(item.thumbnail_path,3600);if(thumb?.signedUrl)media.poster=thumb.signedUrl;}
-   if(isVideo){media.controls=true;media.preload='metadata';media.playsInline=true;media.setAttribute('controlsList','nodownload');attachWatchTracking(item.id,media);}
+   if(isVideo){media.controls=true;media.preload='metadata';media.playsInline=true;media.setAttribute('controlsList','nodownload');media.addEventListener('play',()=>{if(activeFeedVideo!==media)stopOtherFeedVideos(media);});media.addEventListener('pause',()=>{if(activeFeedVideo===media)activeFeedVideo=null;});feedVideoRatios.set(media,0);feedVideoObserver.observe(media);attachWatchTracking(item.id,media);}
    else media.alt=item.title||'Vexora video';
    card.append(media);
    if(isVideo){
