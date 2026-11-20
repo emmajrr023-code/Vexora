@@ -170,7 +170,39 @@ async function searchPublicMedia(){
  }
  message.textContent=rows.length+' public result(s) found. Only approved public uploads are searchable.';
 }
+
 el('mediaSearchBtn').addEventListener('click',searchPublicMedia);
+async function loadHomeFeed(term=''){
+ const grid=el('homeFeed');grid.replaceChildren();
+ let query=supabase.from('videos').select('id,title,description,storage_path,created_at,uploader_id').eq('status','approved').eq('visibility','public').order('created_at',{ascending:false}).limit(24);
+ const safeTerm=term.replace(/[%,_()]/g,' ').trim();
+ if(safeTerm)query=query.or('title.ilike.%'+safeTerm+'%,description.ilike.%'+safeTerm+'%');
+ const {data:rows,error}=await query;
+ if(error){const p=document.createElement('div');p.className='feed-empty';p.textContent='Videos could not be loaded right now.';grid.append(p);return;}
+ if(!rows?.length){const p=document.createElement('div');p.className='feed-empty';p.textContent='No public videos yet. Be the first to share a video on Vexora.';grid.append(p);return;}
+ for(const item of rows){
+  const card=document.createElement('article');card.className='feed-card';
+  const {data:signed}=await supabase.storage.from('vexora-videos').createSignedUrl(item.storage_path,3600);
+  if(signed?.signedUrl){
+   const isVideo=/\.(mp4|webm|mov|m4v)$/i.test(item.storage_path||'');
+   const media=document.createElement(isVideo?'video':'img');media.className='feed-media';media.src=signed.signedUrl;
+   if(isVideo){media.controls=true;media.preload='metadata';media.playsInline=true;}else media.alt=item.title||'Vexora video';
+   card.append(media);
+  }else{const unavailable=document.createElement('div');unavailable.className='feed-empty';unavailable.textContent='Preview unavailable';card.append(unavailable);}
+  const meta=document.createElement('div');meta.className='feed-meta';
+  const avatar=document.createElement('div');avatar.className='feed-avatar';avatar.textContent='V';
+  const copy=document.createElement('div');copy.className='feed-copy';
+  const title=document.createElement('p');title.className='feed-title';title.textContent=item.title||'Untitled video';
+  const sub=document.createElement('p');sub.className='feed-sub';sub.textContent='Vexora creator · '+new Date(item.created_at).toLocaleDateString();
+  copy.append(title,sub);meta.append(avatar,copy);card.append(meta);grid.append(card);
+ }
+}
+document.querySelectorAll('[data-feed-query]').forEach(button=>button.addEventListener('click',()=>{
+ document.querySelectorAll('[data-feed-query]').forEach(b=>b.classList.toggle('active',b===button));
+ loadHomeFeed(button.dataset.feedQuery||'');
+}));
+loadHomeFeed();
+
 $('topSearchForm').addEventListener('submit',event=>{event.preventDefault();const term=$('headerSearchInput').value.trim();$('mediaSearchInput').value=term;document.querySelector('[data-page="homePage"]').click();$('mediaSearchBtn').click();$('search').scrollIntoView({behavior:'smooth'});});
 el('mediaSearchInput').addEventListener('keydown',event=>{if(event.key==='Enter')searchPublicMedia();});
 
