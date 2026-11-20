@@ -436,10 +436,26 @@ el('uploadMediaBtn').addEventListener('click',async()=>{
    if(uploadError)throw uploadError;
    const {data:videoRow,error:rowError}=await supabase.from('videos').insert({uploader_id:currentUser.id,title:chosenTitle||file.name,description:chosenDescription,tags:chosenTags,storage_path:path,status:'pending',visibility:'private',performer_age_verified:false,consent_verified:false}).select('id').single();
    if(rowError){await supabase.storage.from('vexora-videos').remove([path]);throw rowError;}
-   // Upload-first workflow: keep media private and queue it for asynchronous copyright/safety review.
-   // The immediate AI moderation call is intentionally skipped so transient AI failures do not block uploads.
+   // Keep the upload private first, then request the authenticated moderation function.
+   // A moderation outage must not delete a successful private upload.
+   let reviewMessage='Private and awaiting moderator review.';
+   try{
+    const {data:review,error:reviewError}=await supabase.functions.invoke('moderate-upload',{
+     body:{video_id:videoRow.id,desired_visibility:'private'}
+    });
+    if(reviewError){
+     console.warn('Automated moderation could not run:',reviewError);
+     reviewMessage='Private; automated review could not run, awaiting moderator review.';
+    }else{
+     const reviewStatus=review?.status||'pending';
+     reviewMessage=review.message||('Moderation status: '+reviewStatus+'.');
+    }
+   }catch(reviewError){
+    console.warn('Automated moderation request failed:',reviewError);
+    reviewMessage='Private; automated review is temporarily unavailable, awaiting moderator review.';
+   }
    done++;
-   notice.textContent=file.name+' — uploaded successfully. Private while background review is pending.';
+   notice.textContent=file.name+' — uploaded successfully. '+reviewMessage;
   }catch(e){errors.push(file.name+': '+(e.message||'Upload failed'));}
   notice.textContent='Uploaded '+done+' of '+files.length+' file(s)...';
  }
