@@ -319,7 +319,34 @@ async function loadHomeFeed(term='',reset=true){
    if(isVideo){media.controls=true;media.preload='metadata';media.playsInline=true;media.setAttribute('controlsList','nodownload');attachWatchTracking(item.id,media);}
    else media.alt=item.title||'Vexora video';
    card.append(media);
-   if(isVideo){const tools=document.createElement('div');tools.className='feed-actions';const speed=document.createElement('select');speed.setAttribute('aria-label','Playback speed');[0.5,0.75,1,1.25,1.5,2].forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v+'×';if(v===1)o.selected=true;speed.append(o);});speed.addEventListener('change',()=>media.playbackRate=Number(speed.value));tools.append(speed);const quality=document.createElement('select');quality.setAttribute('aria-label','Video quality');quality.title='Only source quality is currently available. Additional resolutions require transcoded video versions.';const sourceOption=document.createElement('option');sourceOption.value='source';sourceOption.textContent='Quality · Original';sourceOption.selected=true;quality.append(sourceOption);['360p','480p','720p (HD)','1080p (Full HD)','1440p (2K)'].forEach(label=>{const option=document.createElement('option');option.value=label;option.textContent=label+' · unavailable';option.disabled=true;quality.append(option);});tools.append(quality);card.append(tools);}
+   if(isVideo){
+    const tools=document.createElement('div');tools.className='feed-actions';
+    const speed=document.createElement('select');speed.setAttribute('aria-label','Playback speed');
+    [0.5,0.75,1,1.25,1.5,2].forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v+'×';if(v===1)o.selected=true;speed.append(o);});
+    speed.addEventListener('change',()=>media.playbackRate=Number(speed.value));tools.append(speed);
+    const quality=document.createElement('select');quality.setAttribute('aria-label','Video quality');quality.title='Choose an available encoded resolution or Auto for network-aware selection.';
+    const {data:renditions}=await supabase.from('video_renditions').select('resolution,storage_path,mime_type,bitrate').eq('video_id',item.id).order('resolution',{ascending:true});
+    const sources=[{resolution:0,label:'Original',url:signed.signedUrl}];
+    for(const rendition of renditions||[]){const {data:variant}=await supabase.storage.from('vexora-videos').createSignedUrl(rendition.storage_path,3600);if(variant?.signedUrl)sources.push({resolution:Number(rendition.resolution),label:Number(rendition.resolution)+'p',url:variant.signedUrl});}
+    const autoOption=document.createElement('option');autoOption.value='auto';autoOption.textContent='Auto';quality.append(autoOption);
+    sources.forEach(source=>{const option=document.createElement('option');option.value=String(source.resolution);option.textContent=source.resolution===0?'Original':source.label;quality.append(option);});
+    const prefKey='vexora-video-quality';let preference='auto';try{preference=localStorage.getItem(prefKey)||'auto';}catch{}
+    if(preference!=='auto'&&!sources.some(x=>String(x.resolution)===preference))preference='auto';
+    quality.value=preference;
+    const chooseAuto=()=>{const connection=navigator.connection||navigator.mozConnection||navigator.webkitConnection;const downlink=Number(connection?.downlink||0);const type=connection?.effectiveType||'';let target=downlink>=8?1440:downlink>=5?1080:downlink>=2.5?720:downlink>=1?480:360;if(type==='slow-2g'||type==='2g')target=360;else if(type==='3g')target=Math.min(target,480);const available=sources.filter(x=>x.resolution>0);if(!available.length)return sources[0];return available.filter(x=>x.resolution<=target).pop()||available[0];};
+    const applyQuality=async()=>{
+     const selected=quality.value==='auto'?chooseAuto():sources.find(x=>String(x.resolution)===quality.value);
+     if(!selected||media.src===selected.url)return;
+     const currentTime=media.currentTime||0,wasPlaying=!media.paused;
+     media.src=selected.url;media.load();
+     media.addEventListener('loadedmetadata',()=>{try{media.currentTime=Math.min(currentTime,media.duration||currentTime);}catch{}if(wasPlaying)media.play().catch(()=>{});},{once:true});
+    };
+    quality.addEventListener('change',()=>{try{localStorage.setItem(prefKey,quality.value);}catch{}applyQuality();});
+    const connection=navigator.connection||navigator.mozConnection||navigator.webkitConnection;
+    if(connection&&quality.value==='auto')connection.addEventListener?.('change',applyQuality);
+    if(sources.length>1){applyQuality();}else{autoOption.textContent='Auto · Original only';}
+    tools.append(quality);card.append(tools);
+   }
   }else{const unavailable=document.createElement('div');unavailable.className='feed-empty';unavailable.textContent='Preview unavailable';card.append(unavailable);}
   const meta=document.createElement('div');meta.className='feed-meta';
   const channel=channelMap.get(item.uploader_id);const avatar=document.createElement('div');avatar.className='feed-avatar';avatar.textContent=(channel?.display_name||'V')[0].toUpperCase();
