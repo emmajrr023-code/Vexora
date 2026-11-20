@@ -849,16 +849,72 @@ async function liveInvoke(body){
  if(data?.error)throw new Error(data.error);
  return data;
 }
+async function loadLiveChat(streamId,host){
+ const {data,error}=await liveDb.from('live_chat_messages').select('id,user_id,content,created_at').eq('stream_id',streamId).order('created_at',{ascending:false}).limit(40);
+ if(error){host.textContent='Chat could not be loaded.';return;}
+ const rows=(data||[]).reverse();
+ const ids=[...new Set(rows.map(x=>x.user_id))];
+ let names={};
+ if(ids.length){const p=await liveDb.from('profiles').select('id,display_name').in('id',ids);(p.data||[]).forEach(x=>names[x.id]=x.display_name||'VEXORA viewer');}
+ host.innerHTML=rows.map(x=>'<div class="feed-comment"><strong>'+liveEscape(names[x.user_id]||'Viewer')+'</strong><div>'+liveEscape(x.content)+'</div></div>').join('')||'<p class="feed-sub">Be the first to chat!</p>';
+ host.scrollTop=host.scrollHeight;
+}
+async function mountLiveInteractions(stream,card){
+ const actions=card.querySelector('[data-live-actions]');
+ const chatList=card.querySelector('[data-live-chat-list]');
+ const likeBtn=card.querySelector('[data-live-like]');
+ const chatForm=card.querySelector('[data-live-chat-form]');
+ const chatInput=card.querySelector('[data-live-chat-input]');
+ const chatSend=card.querySelector('[data-live-chat-send]');
+ const superchatNote=card.querySelector('[data-superchat-note]');
+ const [likes,session,liked]=await Promise.all([
+  liveDb.from('live_likes').select('id',{count:'exact',head:true}).eq('stream_id',stream.id),
+  liveDb.auth.getSession(),
+  (async()=>{const {data:{session}}=await liveDb.auth.getSession();return session?.user?.id?liveDb.from('live_likes').select('id').eq('stream_id',stream.id).eq('user_id',session.user.id).maybeSingle():{data:null};})()
+ ]);
+ likeBtn.textContent='👍 '+(likes.count||0);
+ likeBtn.setAttribute('aria-pressed',String(!!liked.data));
+ likeBtn.addEventListener('click',async()=>{
+  const user=session.data?.session?.user;
+  if(!user){superchatNote.textContent='Please sign in to like or chat.';return;}
+  likeBtn.disabled=true;
+  const result=liked.data
+   ? await liveDb.from('live_likes').delete().eq('stream_id',stream.id).eq('user_id',user.id)
+   : await liveDb.from('live_likes').insert({stream_id:stream.id,user_id:user.id});
+  likeBtn.disabled=false;
+  if(result.error){superchatNote.textContent='Could not update live like. Try again.';return;}
+  liked.data=liked.data?null:{id:'liked'};
+  const count=await liveDb.from('live_likes').select('id',{count:'exact',head:true}).eq('stream_id',stream.id);
+  likeBtn.textContent='👍 '+(count.count||0);likeBtn.setAttribute('aria-pressed',String(!!liked.data));
+ });
+ await loadLiveChat(stream.id,chatList);
+ chatForm.addEventListener('submit',async e=>{
+  e.preventDefault();const user=session.data?.session?.user;
+  if(!user){superchatNote.textContent='Please sign in to chat.';return;}
+  const content=chatInput.value.trim();if(!content)return;
+  chatSend.disabled=true;
+  const {error}=await liveDb.from('live_chat_messages').insert({stream_id:stream.id,user_id:user.id,content});
+  chatSend.disabled=false;
+  if(error){superchatNote.textContent='Message could not be sent. Please retry.';return;}
+  chatInput.value='';await loadLiveChat(stream.id,chatList);
+ });
+ const channel=liveDb.channel('live-chat-'+stream.id).on('postgres_changes',{event:'INSERT',schema:'public',table:'live_chat_messages',filter:'stream_id=eq.'+stream.id},()=>loadLiveChat(stream.id,chatList)).subscribe();
+ card._liveChatChannel=channel;
+ card.querySelector('[data-superchat-send]').addEventListener('click',()=>{
+  superchatNote.textContent='Super Chat is shown here, but secure payments are not connected yet. No money has been charged.';
+ });
+}
 async function refreshLivePublic(){
  const host=liveEl('livePublicList');if(!host)return;
  hlsInstances.forEach(x=>{try{x.destroy()}catch{}});hlsInstances=[];
  const {data,error}=await liveDb.from('live_streams').select('id,title,playback_url,created_at').eq('status','live').order('created_at',{ascending:false}).limit(30);
  if(error){host.innerHTML='<div class="feed-empty">Live streams could not be loaded. Please retry.</div>';return;}
  if(!data?.length){host.innerHTML='<div class="feed-empty">No creators are live right now. Start a stream and it will appear here.</div>';return;}
- host.innerHTML=data.map(s=>'<article class="feed-card"><video class="feed-media" controls playsinline muted data-live-playback="'+liveEscape(s.id)+'"></video><div class="feed-meta"><div class="feed-copy"><p class="feed-title">🔴 '+liveEscape(s.title)+'</p><p class="feed-sub">LIVE on VEXORA</p></div></div></article>').join('');
+ host.innerHTML=data.map(s=>'<article class="feed-card" data-live-card="'+liveEscape(s.id)+'"><video class="feed-media" controls playsinline muted data-live-playback="'+liveEscape(s.id)+'"></video><div class="feed-meta"><div class="feed-copy"><p class="feed-title">🔴 '+liveEscape(s.title)+'</p><p class="feed-sub">LIVE on VEXORA</p></div></div><div class="feed-actions" data-live-actions><button type="button" data-live-like>👍 0</button></div><div class="feed-comments"><strong>Live chat</strong><div data-live-chat-list style="max-height:190px;overflow:auto;margin:8px 0"></div><form data-live-chat-form><textarea data-live-chat-input maxlength="500" placeholder="Say something in live chat…" required></textarea><button type="submit" data-live-chat-send>Send</button></form><div style="border-top:1px solid #303034;margin-top:12px;padding-top:10px"><strong>💎 Super Chat</strong><div class="feed-actions"><input type="number" min="1" max="100000" step="1" value="50" data-superchat-amount aria-label="Super Chat amount in rupees" style="width:100px"><input type="text" maxlength="200" placeholder="Add a highlighted message" data-superchat-message style="flex:1;min-width:120px"><button type="button" data-superchat-send>Continue</button></div><p class="feed-sub" data-superchat-note>Support this creator with a highlighted paid message. Payment setup pending.</p></div></div></article>').join('');
  const videos=[...host.querySelectorAll('video[data-live-playback]')];
  const {default:Hls}=await import('https://esm.sh/hls.js@1.5.17');
  videos.forEach((video,i)=>{const src=data[i].playback_url;if(video.canPlayType('application/vnd.apple.mpegurl'))video.src=src;else if(Hls.isSupported()){const h=new Hls({liveSyncDurationCount:3});h.loadSource(src);h.attachMedia(video);hlsInstances.push(h);}});
+ for(let i=0;i<data.length;i++){const card=host.querySelector('[data-live-card="'+data[i].id+'"]');if(card)mountLiveInteractions(data[i],card);}
 }
 async function createVexoraLive(){
  const button=liveEl('goLiveBtn'),status=liveEl('liveSetupStatus');
