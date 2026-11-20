@@ -506,7 +506,7 @@ async function recordWatch(videoId,video,completed){
 document.querySelectorAll('[data-feed-query]').forEach(button=>button.addEventListener('click',()=>{
  const mode=button.dataset.feedQuery||'all';activeFeedMode=mode;
  document.querySelectorAll('[data-feed-query]').forEach(b=>b.classList.toggle('active',b===button));
- el('musicHub').hidden=mode!=='music';el('liveHub').hidden=mode!=='live';
+ el('liveHub').hidden=mode!=='live';
  if(mode==='music')el('recommendedSection').querySelector('h2').textContent='Music tracks';else if(mode==='videos')el('recommendedSection').querySelector('h2').textContent='Videos';else if(mode==='live')el('recommendedSection').querySelector('h2').textContent='Live broadcasts';else el('recommendedSection').querySelector('h2').textContent='Recommended';
  loadHomeFeed(mode==='music'?'music':(mode==='videos'||mode==='live'?'':'shorts'),true);
 }));
