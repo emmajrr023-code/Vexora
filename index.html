@@ -75,7 +75,7 @@ main.wrap{padding:14px 12px 92px;margin:0;width:100%}
 <section><h2 id="privacyTitle">Your privacy choices</h2><div class="grid"><div class="panel"><strong>🌍 Public</strong><p class="muted" id="publicDesc">Approved media can be discovered and watched by everyone.</p></div><div class="panel"><strong>🔒 Private</strong><p class="muted" id="privateDesc">Private media is visible only to its owner after sign-in.</p></div></div></section>
 </div>
 <section id="profilePage" class="page"><h2>My Profile</h2><div class="panel"><img class="profile-banner" id="bannerPreview" alt="Channel banner" hidden><div class="profile-head"><div class="avatar" id="avatarPreview">V</div><div><strong id="profileNamePreview">Vexora User</strong><div class="muted">Your personal profile</div></div></div><div class="field"><label for="profileName">Display name</label><input id="profileName" placeholder="Your name" value="Vexora User"></div><div class="field"><label for="profileBio">Bio</label><input id="profileBio" placeholder="Tell people about yourself"></div><div class="field"><label for="bannerFile">Channel art (JPG, PNG or WebP · up to 5 MB)</label><input id="bannerFile" type="file" accept="image/jpeg,image/png,image/webp"></div><div class="field"><label for="avatarFile">Profile photo (choose from your phone gallery)</label><input id="avatarFile" type="file" accept="image/jpeg,image/png,image/webp"><small class="muted">JPG, PNG or WebP · up to 5 MB</small></div><button class="btn primary" id="saveProfile">Save profile</button><p class="notice" id="profileNotice">Log in to view and update your private profile.</p></div></section>
-<section id="uploadsPage" class="page"><h2>My Uploads</h2><div class="panel"><p class="muted">Your uploaded photos and videos. Uploads are accepted first and kept private while copyright/safety review is pending.</p><button class="btn primary" id="refreshUploads" type="button">Refresh my uploads</button><button class="btn secondary" id="goUpload" type="button">Choose media</button><button class="btn primary" id="uploadFromUploads" type="button">Upload a photo or video</button> <a href="/earnings.html" class="btn secondary">Creator earnings</a><div id="myUploadsList" style="margin-top:16px"></div><p class="notice" id="uploadsNotice">Log in to view your uploads.</p><div id="moderationHistory"></div></div></section>
+<section id="uploadsPage" class="page"><h2>My Uploads</h2><div class="panel"><p class="muted">Your uploaded photos and videos. Uploads are accepted first and kept private while copyright/safety review is pending.</p><button class="btn primary" id="refreshUploads" type="button">Refresh my uploads</button><button class="btn secondary" id="goUpload" type="button">Choose media</button><button class="btn primary" id="uploadFromUploads" type="button">Upload a photo or video</button> <a href="/earnings.html" class="btn secondary">Creator earnings</a><section class="panel"><h3>Creator Studio Analytics</h3><div id="creatorAnalytics">Sign in to view channel analytics.</div><button class="btn secondary" id="refreshAnalytics" type="button">Refresh analytics</button></section><div id="myUploadsList" style="margin-top:16px"></div><p class="notice" id="uploadsNotice">Log in to view your uploads.</p><div id="moderationHistory"></div></div></section>
 <section id="adminPage" class="page"><h2>Moderation dashboard</h2><div class="panel"><p class="muted">Review quarantined media and user appeals. Only administrator accounts can access this area.</p><button class="btn primary" id="refreshAdmin" type="button">Refresh review queue</button><div id="adminQueue" style="margin-top:16px"></div><p class="notice" id="adminNotice">Administrator access required.</p></div></section>
 <section id="settingsPage" class="page"><h2>Settings</h2><div class="panel">
 <div class="setting-row"><label for="themeSetting">Appearance</label><select id="themeSetting"><option value="dark">Dark</option><option value="light">Light</option></select></div>
@@ -205,7 +205,7 @@ async function loadHomeFeed(term='',reset=true){
    const isVideo=/\.(mp4|webm|mov|m4v)$/i.test(item.storage_path||'');
    media=document.createElement(isVideo?'video':'img');media.className='feed-media';media.src=signed.signedUrl;
    if(isVideo&&item.thumbnail_path){const {data:thumb}=await supabase.storage.from('vexora-videos').createSignedUrl(item.thumbnail_path,3600);if(thumb?.signedUrl)media.poster=thumb.signedUrl;}
-   if(isVideo){media.controls=true;media.preload='metadata';media.playsInline=true;media.addEventListener('play',()=>recordWatch(item.id,media,false));let lastSaved=0;media.addEventListener('timeupdate',()=>{if(Math.floor(media.currentTime/15)>lastSaved){lastSaved=Math.floor(media.currentTime/15);recordWatch(item.id,media,false);}});media.addEventListener('ended',()=>recordWatch(item.id,media,true));}
+   if(isVideo){media.controls=true;media.preload='metadata';media.playsInline=true;attachWatchTracking(item.id,media);}
    else media.alt=item.title||'Vexora video';
    card.append(media);
    if(isVideo){const tools=document.createElement('div');tools.className='feed-actions';const speed=document.createElement('select');speed.setAttribute('aria-label','Playback speed');[0.5,0.75,1,1.25,1.5,2].forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v+'×';if(v===1)o.selected=true;speed.append(o);});speed.addEventListener('change',()=>media.playbackRate=Number(speed.value));tools.append(speed);const quality=document.createElement('select');quality.disabled=true;quality.setAttribute('aria-label','Video quality');const q=document.createElement('option');q.textContent='Original quality';quality.append(q);tools.append(quality);card.append(tools);}
@@ -276,6 +276,32 @@ el('createPlaylist').addEventListener('click',async()=>{if(!currentUser){openAut
 document.querySelector('[data-page="subscriptionsPage"]').addEventListener('click',loadSubscriptions);
 document.querySelector('[data-page="libraryPage"]').addEventListener('click',loadLibrary);
 document.querySelector('[data-page="historyPage"]').addEventListener('click',loadHistory);
+function attachWatchTracking(videoId,video){
+ let sessionId=null,watched=0,lastTime=0,lastPersist=0,done=false;
+ video.addEventListener('play',()=>{if(!currentUser)return;if(!sessionId||done){sessionId=crypto.randomUUID();watched=0;lastPersist=0;lastTime=video.currentTime||0;done=false;}});
+ video.addEventListener('timeupdate',()=>{if(!currentUser||!sessionId||video.paused)return;const now=video.currentTime||0,delta=now-lastTime;if(delta>0&&delta<5)watched+=delta;lastTime=now;if(watched-lastPersist>=15){lastPersist=watched;persistWatchSession(sessionId,videoId,video,watched,false);recordWatch(videoId,video,false);}});
+ video.addEventListener('ended',()=>{if(sessionId){persistWatchSession(sessionId,videoId,video,watched,true);recordWatch(videoId,video,true);done=true;}});
+}
+async function persistWatchSession(sessionId,videoId,video,watched,completed){
+ if(!currentUser)return;
+ const {error}=await supabase.from('video_watch_sessions').upsert({session_id:sessionId,viewer_id:currentUser.id,video_id:videoId,watched_seconds:Math.floor(watched),max_position_seconds:Math.floor(video.currentTime||0),completed,updated_at:new Date().toISOString()},{onConflict:'session_id'});
+ if(error)console.warn('Creator analytics session could not be saved',error);
+}
+async function loadCreatorAnalytics(){
+ const out=el('creatorAnalytics');if(!currentUser){out.textContent='Sign in to view channel analytics.';return;}
+ const [{data:daily,error},{data:subs},{data:videos}]=await Promise.all([
+  supabase.from('video_analytics_daily').select('video_id,report_date,view_count,watch_seconds,completed_views').eq('creator_id',currentUser.id),
+  supabase.from('subscriptions').select('subscriber_id,created_at').eq('channel_id',currentUser.id),
+  supabase.from('videos').select('id,title').eq('uploader_id',currentUser.id)
+ ]);
+ if(error){out.textContent='Analytics could not be loaded: '+error.message;return;}
+ const views=(daily||[]).reduce((n,x)=>n+Number(x.view_count||0),0),seconds=(daily||[]).reduce((n,x)=>n+Number(x.watch_seconds||0),0),completed=(daily||[]).reduce((n,x)=>n+Number(x.completed_views||0),0);
+ const metrics=document.createElement('p');metrics.textContent='Tracked plays: '+views.toLocaleString()+' · Watch time: '+(seconds/3600).toFixed(2)+' hours · Completed plays: '+completed.toLocaleString()+' · Subscribers: '+(subs||[]).length.toLocaleString();out.replaceChildren(metrics);
+ const map=new Map((videos||[]).map(v=>[v.id,v.title]));const byVideo=new Map();for(const x of daily||[]){const a=byVideo.get(x.video_id)||{views:0,seconds:0};a.views+=Number(x.view_count||0);a.seconds+=Number(x.watch_seconds||0);byVideo.set(x.video_id,a);}
+ for(const [id,a] of byVideo){const row=document.createElement('p');row.textContent=(map.get(id)||'Video')+' — '+a.views+' plays · '+(a.seconds/60).toFixed(1)+' min watched';out.append(row);}
+ if(!daily?.length) {const note=document.createElement('p');note.className='muted';note.textContent='Analytics will appear after signed-in viewers watch at least 15 seconds.';out.append(note);}
+}
+el('refreshAnalytics').addEventListener('click',loadCreatorAnalytics);
 async function recordWatch(videoId,video,completed){
  if(!currentUser)return;
  const {error}=await supabase.from('watch_history').upsert({user_id:currentUser.id,video_id:videoId,watched_at:new Date().toISOString(),position_seconds:Math.floor(video.currentTime||0),duration_seconds:Number.isFinite(video.duration)?Math.floor(video.duration):null,completed},{onConflict:'user_id,video_id'});
@@ -394,7 +420,7 @@ async function loadMyUploads(){
   }else{const msg=document.createElement('p');msg.className='muted';msg.textContent='Private preview is temporarily unavailable.';card.append(msg);}
   list.append(card);
  }
- notice.textContent=rows.length+' upload(s) found. Uploads are private while review is pending.';
+ notice.textContent=rows.length+' upload(s) found. Uploads are private while review is pending.';loadCreatorAnalytics();
  const history=el('moderationHistory');history.replaceChildren();const hTitle=document.createElement('h3');hTitle.textContent='Moderation & appeals history';history.append(hTitle);
  const {data:events}=await supabase.from('moderation_events').select('event_type,reason,created_at').eq('user_id',currentUser.id).order('created_at',{ascending:false}).limit(20);
  (events||[]).forEach(ev=>{const p=document.createElement('p');p.className='muted';p.textContent=ev.event_type+' · '+(ev.reason||'')+' · '+new Date(ev.created_at).toLocaleString();history.append(p);});
