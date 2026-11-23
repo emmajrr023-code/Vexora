@@ -285,11 +285,12 @@ $('themeSetting').addEventListener('change',e=>{const light=e.target.value==='li
 if($('themeSetting').value==='light'){$('themeSetting').dispatchEvent(new Event('change'));}
 
 </script>
+<script>
+window.vexoraSupabaseReady=import('https://esm.sh/@supabase/supabase-js@2.86.0').then(({createClient})=>createClient('https://retyursehkyhzyyemjyz.supabase.co','sb_publishable_0KZ6Xb7FM0RwYebAdUM3Rw_MAbaqiZQ'));
+</script>
 <script type="module">
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.86.0';
-
 const el=id=>document.getElementById(id);
-const supabase = createClient('https://retyursehkyhzyyemjyz.supabase.co','sb_publishable_0KZ6Xb7FM0RwYebAdUM3Rw_MAbaqiZQ');
+const supabase=await window.vexoraSupabaseReady;
 window.vexoraSupabase=supabase;
 function uploadFileWithProgress(path,file,onProgress){
  return new Promise(async(resolve,reject)=>{
@@ -811,8 +812,7 @@ loadAccount();
 </script>
 
 <script type="module">
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.86.0';
-const lbClient=window.vexoraSupabase;
+const lbClient=await window.vexoraSupabaseReady;
 (()=>{const $=id=>document.getElementById(id);if(!$('leaderboardPage'))return;let type='top_creators';let rows=[];let categories=[];
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const score=v=>Number(v||0).toLocaleString(undefined,{maximumFractionDigits:1});
@@ -856,8 +856,7 @@ document.querySelectorAll('[data-lb-type]').forEach(b=>b.addEventListener('click
 </script>
 
 <script type="module">
-import { createClient as createBadgeClient } from 'https://esm.sh/@supabase/supabase-js@2.86.0';
-const badgeClient=window.vexoraSupabase;
+const badgeClient=await window.vexoraSupabaseReady;
 const badgeEl=id=>document.getElementById(id);
 const badgeEsc=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 async function loadCreatorBadges(){
@@ -885,8 +884,7 @@ loadCreatorBadges();
 </script>
 
 <script type="module">
-import {createClient as createAdminClient} from 'https://esm.sh/@supabase/supabase-js@2.86.0';
-const adminDb=window.vexoraSupabase;
+const adminDb=await window.vexoraSupabaseReady;
 const ae=id=>document.getElementById(id);const escAdmin=s=>String(s??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 async function loadOwnerDashboard(){const status=ae('ownerAdminStatus');if(!status)return;status.textContent='Verifying owner permissions…';const {data:{user}}=await adminDb.auth.getUser();if(!user){status.textContent='Please sign in with your owner account.';return;}const {data:role}=await adminDb.from('user_roles').select('role').eq('user_id',user.id).maybeSingle();if(role?.role!=='admin'){ae('adminNav').hidden=true;document.querySelector('[data-page="homePage"]')?.click();status.textContent='Access denied.';return;}ae('adminNav').hidden=false;status.textContent='Owner access verified · '+user.email;
 const count=async(table,query)=>{let q=adminDb.from(table).select('*',{count:'exact',head:true});if(query)q=query(q);const r=await q;return r.error?'—':(r.count??0)};
@@ -898,8 +896,7 @@ ae('refreshOwnerDashboard')?.addEventListener('click',loadOwnerDashboard);docume
 </script>
 
 <script type="module">
-import { createClient as createLiveClient } from 'https://esm.sh/@supabase/supabase-js@2.86.0';
-const liveDb=window.vexoraSupabase;
+const liveDb=await window.vexoraSupabaseReady;
 const liveEl=id=>document.getElementById(id);
 let activeLiveStream=null;
 let lastLiveStatus=null;
