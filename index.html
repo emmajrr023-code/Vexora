@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#ffffff">
 <title>VEXORA — AI & Media</title>
 <style>
@@ -168,6 +168,49 @@ footer{background:#fff!important;color:#626b78!important;border-color:#e5e7eb!im
 .lb-earned-badge{display:inline-flex;vertical-align:middle;margin-left:3px;padding:1px 4px;border-radius:6px;background:#49331f;border:1px solid #896637;color:#ffd88a;font-size:12px;line-height:1.4}.lb-main .lb-earned-badge{font-size:11px}
 .discovery-chips button.category-locked,.discovery-chips button.category-locked:disabled{opacity:.62;cursor:not-allowed;border:1px solid #555563;background:#25252d;color:#b8b8c4;filter:saturate(.55)}.discovery-chips button.category-locked:disabled:hover{transform:none;box-shadow:none}.music-artwork{width:min(100%,320px);aspect-ratio:1;margin:10px auto 14px;border-radius:18px;overflow:hidden;background:radial-gradient(circle at 35% 25%,#765064,#211722 65%,#09090d);box-shadow:0 12px 35px #0004}.music-artwork img{width:100%;height:100%;object-fit:cover;display:block}.music-artwork-fallback{height:100%;display:grid;place-items:center;color:#f4d8e4;font-size:110px;font-weight:300;background:radial-gradient(circle at 50% 35%,#775065,#19141f 70%)}
 .discovery-chips{justify-content:space-between;overflow:visible;flex-wrap:nowrap;gap:7px}.discovery-chips button{flex:1 1 0;min-width:0;padding:10px 8px;text-align:center;white-space:nowrap}.upload-type-tabs{display:flex;gap:10px;margin:0 0 18px}.upload-type-tabs button{flex:1}.upload-type-tabs button.active{box-shadow:0 0 0 2px #e11d3630}
+/* Android APK / narrow-screen safe-area and fixed navigation correction */
+html { min-height:100%; min-height:100dvh; }
+body { min-width:0; min-height:100%; min-height:100dvh; overflow-x:hidden; }
+main.wrap, .page, .page > section, .panel { min-width:0; max-width:100%; }
+@media(max-width:650px) {
+  .top {
+    box-sizing:border-box;
+    min-height:calc(58px + env(safe-area-inset-top, 0px));
+    height:auto;
+    padding:env(safe-area-inset-top, 0px) 10px 0;
+    gap:7px;
+    flex-wrap:nowrap;
+  }
+  .top-search { min-width:0; flex:1 1 auto; }
+  .top-search input { min-width:0; }
+  .top > .btn { flex:0 0 auto; }
+  main.wrap {
+    box-sizing:border-box;
+    width:100%;
+    max-width:100%;
+    padding:14px 12px calc(82px + env(safe-area-inset-bottom, 0px));
+    margin:0;
+  }
+  .app-nav {
+    box-sizing:border-box;
+    top:auto;
+    bottom:0;
+    left:0;
+    right:0;
+    width:100%;
+    height:calc(66px + env(safe-area-inset-bottom, 0px));
+    min-height:66px;
+    padding:5px 4px calc(5px + env(safe-area-inset-bottom, 0px));
+    overflow-x:auto;
+    overflow-y:hidden;
+    z-index:100;
+  }
+  .app-nav button { min-width:0; }
+  .page > section { max-width:100%; }
+  .feed-grid, .search-results { min-width:0; }
+  footer { margin-left:0; }
+}
+
 </style>
   <meta name="google-adsense-account" content="ca-pub-3777073112684086">
 </head>
