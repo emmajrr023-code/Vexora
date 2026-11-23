@@ -1,0 +1,12 @@
+{
+  "appId": "com.beeba.social",
+  "appName": "BEEBA",
+  "webDir": "www",
+  "server": {
+    "url": "https://vexora-space.vercel.app/beeba/",
+    "cleartext": false
+  },
+  "android": {
+    "allowMixedContent": false
+  }
+}
