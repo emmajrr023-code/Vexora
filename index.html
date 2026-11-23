@@ -269,7 +269,6 @@ $('voiceBtn').addEventListener('click',()=>{
  rec.start();
 });
 
-$('loginBtn').addEventListener('click',()=>openAuth());
 $('closeAuth').addEventListener('click',()=>{$('authModal').style.display='none';});
 
 document.querySelectorAll('.app-nav button').forEach(button=>button.addEventListener('click',()=>{if(button.dataset.page==='adminPage'&&button.hidden)return;document.querySelectorAll('.app-nav button').forEach(b=>b.classList.toggle('active',b===button));document.querySelectorAll('main>.page').forEach(p=>p.classList.toggle('active',p.id===button.dataset.page));if(button.dataset.page==='profilePage'&&!window.vexoraCurrentUser){$('profileNotice').textContent='Log in to view and edit your private profile. Tap Login above.';}if(button.dataset.page==='uploadsPage'&&!window.vexoraCurrentUser){$('uploadsNotice').textContent='Log in to view your private uploads. Public media remains available from Home search.';}window.scrollTo({top:0,behavior:'smooth'});}));
@@ -291,6 +290,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.86.0';
 
 const el=id=>document.getElementById(id);
 const supabase = createClient('https://retyursehkyhzyyemjyz.supabase.co','sb_publishable_0KZ6Xb7FM0RwYebAdUM3Rw_MAbaqiZQ');
+window.vexoraSupabase=supabase;
 function uploadFileWithProgress(path,file,onProgress){
  return new Promise(async(resolve,reject)=>{
   try{
@@ -653,6 +653,7 @@ async function loadMyUploads(){
  const list=el('myUploadsList'),notice=el('uploadsNotice');
  if(!currentUser){list.innerHTML='';notice.textContent='Please log in to view your uploads.';return;}
  notice.textContent='Loading your uploads...';list.innerHTML='';
+ try{
  let rows=[],error=null;
  for(let from=0;from<10000;from+=100){
   const result=await supabase.from('videos').select('id,title,description,tags,storage_path,thumbnail_path,status,visibility,created_at').eq('uploader_id',currentUser.id).order('created_at',{ascending:false}).range(from,from+99);
@@ -738,6 +739,7 @@ async function loadMyUploads(){
  (events||[]).forEach(ev=>{const p=document.createElement('p');p.className='muted';p.textContent=ev.event_type+' · '+(ev.reason||'')+' · '+new Date(ev.created_at).toLocaleString();history.append(p);});
  const {data:appeals}=await supabase.from('video_appeals').select('status,reason,created_at').eq('user_id',currentUser.id).order('created_at',{ascending:false});
  (appeals||[]).forEach(a=>{const p=document.createElement('p');p.className='muted';p.textContent='Appeal: '+a.status+' · '+a.reason+' · '+new Date(a.created_at).toLocaleString();history.append(p);});
+}catch(error){console.error('VEXORA uploads load failed:',error);notice.textContent='Could not load uploads: '+(error?.message||'Network or server error. Please try again.');}
 }
 
 async function loadAiSafety(){
@@ -810,7 +812,7 @@ loadAccount();
 
 <script type="module">
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.86.0';
-const lbClient=createClient('https://retyursehkyhzyyemjyz.supabase.co','sb_publishable_0KZ6Xb7FM0RwYebAdUM3Rw_MAbaqiZQ');
+const lbClient=window.vexoraSupabase;
 (()=>{const $=id=>document.getElementById(id);if(!$('leaderboardPage'))return;let type='top_creators';let rows=[];let categories=[];
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const score=v=>Number(v||0).toLocaleString(undefined,{maximumFractionDigits:1});
@@ -855,7 +857,7 @@ document.querySelectorAll('[data-lb-type]').forEach(b=>b.addEventListener('click
 
 <script type="module">
 import { createClient as createBadgeClient } from 'https://esm.sh/@supabase/supabase-js@2.86.0';
-const badgeClient=createBadgeClient('https://retyursehkyhzyyemjyz.supabase.co','sb_publishable_0KZ6Xb7FM0RwYebAdUM3Rw_MAbaqiZQ');
+const badgeClient=window.vexoraSupabase;
 const badgeEl=id=>document.getElementById(id);
 const badgeEsc=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 async function loadCreatorBadges(){
@@ -884,7 +886,7 @@ loadCreatorBadges();
 
 <script type="module">
 import {createClient as createAdminClient} from 'https://esm.sh/@supabase/supabase-js@2.86.0';
-const adminDb=createAdminClient('https://retyursehkyhzyyemjyz.supabase.co','sb_publishable_0KZ6Xb7FM0RwYebAdUM3Rw_MAbaqiZQ');
+const adminDb=window.vexoraSupabase;
 const ae=id=>document.getElementById(id);const escAdmin=s=>String(s??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 async function loadOwnerDashboard(){const status=ae('ownerAdminStatus');if(!status)return;status.textContent='Verifying owner permissions…';const {data:{user}}=await adminDb.auth.getUser();if(!user){status.textContent='Please sign in with your owner account.';return;}const {data:role}=await adminDb.from('user_roles').select('role').eq('user_id',user.id).maybeSingle();if(role?.role!=='admin'){ae('adminNav').hidden=true;document.querySelector('[data-page="homePage"]')?.click();status.textContent='Access denied.';return;}ae('adminNav').hidden=false;status.textContent='Owner access verified · '+user.email;
 const count=async(table,query)=>{let q=adminDb.from(table).select('*',{count:'exact',head:true});if(query)q=query(q);const r=await q;return r.error?'—':(r.count??0)};
@@ -897,7 +899,7 @@ ae('refreshOwnerDashboard')?.addEventListener('click',loadOwnerDashboard);docume
 
 <script type="module">
 import { createClient as createLiveClient } from 'https://esm.sh/@supabase/supabase-js@2.86.0';
-const liveDb=createLiveClient('https://retyursehkyhzyyemjyz.supabase.co','sb_publishable_0KZ6Xb7FM0RwYebAdUM3Rw_MAbaqiZQ');
+const liveDb=window.vexoraSupabase;
 const liveEl=id=>document.getElementById(id);
 let activeLiveStream=null;
 let lastLiveStatus=null;
