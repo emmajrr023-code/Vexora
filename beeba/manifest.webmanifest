@@ -1,0 +1,10 @@
+{
+  "name": "BEEBA",
+  "short_name": "BEEBA",
+  "start_url": "/beeba/",
+  "scope": "/beeba/",
+  "display": "standalone",
+  "background_color": "#09090b",
+  "theme_color": "#09090b",
+  "icons": []
+}
