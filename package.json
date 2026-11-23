@@ -1,0 +1,16 @@
+{
+  "name": "beeba-android",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Android wrapper for the BEEBA social app",
+  "scripts": {
+    "android:build": "npx cap add android && npx cap sync android && cd android && ./gradlew assembleDebug"
+  },
+  "dependencies": {
+    "@capacitor/core": "^8.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/android": "^8.0.0",
+    "@capacitor/cli": "^8.0.0"
+  }
+}
