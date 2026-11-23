@@ -334,7 +334,7 @@ async function searchPublicMedia(){
 }
 
 el('mediaSearchBtn').addEventListener('click',searchPublicMedia);
-let feedOffset=0,feedDone=false,feedLoading=false,activeFeedTerm='',activeFeedMode='all';
+let feedOffset=0,feedDone=false,feedLoading=false,feedReloadPending=false,feedGeneration=0,activeFeedTerm='',activeFeedMode='all';
  const feedVideoRatios=new Map();let activeFeedVideo=null;let feedAutoSwitching=false;
  function stopOtherFeedVideos(keep=null){document.querySelectorAll('#homeFeed video.feed-media, #homeFeed audio.feed-media').forEach(m=>{if(m!==keep&&!m.paused)m.pause();});if(keep&&keep.tagName==='VIDEO')activeFeedVideo=keep;else if(activeFeedVideo&&activeFeedVideo!==keep){activeFeedVideo.pause();activeFeedVideo=null;}}
  // One shared playback focus: only one audio or video may produce sound at a time.
@@ -344,26 +344,30 @@ let feedOffset=0,feedDone=false,feedLoading=false,activeFeedTerm='',activeFeedMo
  document.addEventListener('visibilitychange',()=>{if(document.hidden)stopOtherFeedVideos();});
 
 async function loadHomeFeed(term='',reset=true){
- if(feedLoading)return;
- if(reset){feedOffset=0;feedDone=false;activeFeedTerm=term;el('homeFeed').replaceChildren();}
+ if(reset){feedGeneration++;feedOffset=0;feedDone=false;activeFeedTerm=term;el('homeFeed').replaceChildren();stopOtherFeedVideos();}
+ if(feedLoading){if(reset)feedReloadPending=true;return;}
  if(feedDone)return;
  feedLoading=true;
+ const generation=feedGeneration;
  const grid=el('homeFeed');
+ try{
  let query=supabase.from('videos').select('id,title,description,storage_path,thumbnail_path,created_at,uploader_id,views_count,tags').eq('status','approved').eq('visibility','public').order('created_at',{ascending:false}).range(feedOffset,feedOffset+23);
   const sharedVideoId=new URLSearchParams(location.search).get('video');if(reset&&sharedVideoId)query=query.eq('id',sharedVideoId);
  const safeTerm=term.replace(/[%,_()]/g,' ').trim();
- if(safeTerm&&safeTerm!=='videos'&&safeTerm!=='live')query=query.or('title.ilike.%'+safeTerm+'%,description.ilike.%'+safeTerm+'%');
+ if(safeTerm&&!['all','videos','music','shorts','live'].includes(safeTerm.toLowerCase()))query=query.or('title.ilike.%'+safeTerm+'%,description.ilike.%'+safeTerm+'%');
  const {data:rows,error}=await query;
+ if(generation!==feedGeneration)return;
  if(error){const p=document.createElement('div');p.className='feed-empty';p.textContent='Videos could not be loaded right now.';grid.append(p);feedLoading=false;return;}
  if(!rows?.length){feedDone=true;if(feedOffset===0){const p=document.createElement('div');p.className='feed-empty';p.textContent='No public videos yet. Be the first to share a video on Vexora.';grid.append(p);}feedLoading=false;return;}
  feedOffset+=rows.length;if(rows.length<24)feedDone=true;
  const ids=[...new Set(rows.map(x=>x.uploader_id).filter(Boolean))];
  const {data:channels}=await supabase.from('channel_public_profiles').select('id,display_name,avatar_url,banner_url').in('id',ids);
+ if(generation!==feedGeneration)return;
  const channelMap=new Map((channels||[]).map(x=>[x.id,x]));
  for(const item of rows){
   const audioFile=/\.(mp3|m4a|aac|wav|ogg|opus|flac)$/i.test(item.storage_path||'');
   if(activeFeedMode==='music'&&!audioFile)continue;
-  if(activeFeedMode==='videos'&&audioFile)continue;
+  if((activeFeedMode==='videos'||activeFeedMode==='shorts')&&audioFile)continue;
   if(activeFeedMode==='live')continue;
   const card=document.createElement('article');card.className='feed-card';card.dataset.videoId=item.id;
   const {data:signed}=await supabase.storage.from('vexora-videos').createSignedUrl(item.storage_path,3600);
@@ -433,8 +437,14 @@ async function loadHomeFeed(term='',reset=true){
   function renderComment(c,isReply){if(list.querySelector('[data-comment-id="'+c.id+'"]'))return;const row=document.createElement('div');row.className='feed-comment'+(isReply?' reply':'');row.dataset.commentId=c.id;const body=document.createElement('p');body.textContent=c.content;row.append(body);if(c.status==='pending'&&currentUser?.id===c.user_id){const pending=document.createElement('small');pending.textContent='Pending review · only you can see this for now';pending.className='muted';row.append(pending);}const reply=document.createElement('button');reply.textContent='Reply';reply.addEventListener('click',async()=>{if(!currentUser){openAuth();return;}const content=prompt('Write a reply');if(!content?.trim())return;const {data:replyRow,error}=await supabase.from('comments').insert({video_id:item.id,user_id:currentUser.id,parent_id:c.id,content:content.trim(),status:'pending'}).select('id,parent_id,user_id,content,created_at,status').single();if(error){alert('Reply could not be posted: '+error.message);return;}renderComment(replyRow,true);});row.append(reply);list.append(row);}
   comments.append(list,commentInput,post);card.append(comments);grid.append(card);
  }
- feedLoading=false;
- if(rows.length===24&&!feedDone&&el('feedSentinel').getBoundingClientRect().top<window.innerHeight+600)window.setTimeout(()=>loadHomeFeed(activeFeedTerm,false),0);
+ if(generation===feedGeneration&&rows.length===24&&!feedDone&&el('feedSentinel').getBoundingClientRect().top<window.innerHeight+600)window.setTimeout(()=>loadHomeFeed(activeFeedTerm,false),0);
+ }catch(error){
+  console.error('VEXORA feed load failed:',error);
+  if(generation===feedGeneration){const p=document.createElement('div');p.className='feed-empty';p.textContent='Videos could not be loaded right now. Please refresh and try again.';grid.append(p);}
+ }finally{
+  feedLoading=false;
+  if(feedReloadPending){feedReloadPending=false;window.setTimeout(()=>loadHomeFeed(activeFeedTerm,false),0);}
+ }
 }
 async function loadSubscriptions(){
  const out=el('subscriptionsList');if(!currentUser){out.textContent='Sign in to view channels you follow.';return;}
@@ -643,9 +653,14 @@ async function loadMyUploads(){
  const list=el('myUploadsList'),notice=el('uploadsNotice');
  if(!currentUser){list.innerHTML='';notice.textContent='Please log in to view your uploads.';return;}
  notice.textContent='Loading your uploads...';list.innerHTML='';
- const {data:rows,error}=await supabase.from('videos').select('id,title,description,tags,storage_path,thumbnail_path,status,visibility,created_at').eq('uploader_id',currentUser.id).order('created_at',{ascending:false});
+ let rows=[],error=null;
+ for(let from=0;from<10000;from+=100){
+  const result=await supabase.from('videos').select('id,title,description,tags,storage_path,thumbnail_path,status,visibility,created_at').eq('uploader_id',currentUser.id).order('created_at',{ascending:false}).range(from,from+99);
+  if(result.error){error=result.error;break;}
+  const batch=result.data||[];rows.push(...batch);if(batch.length<100)break;
+ }
  if(error){notice.textContent='Could not load uploads: '+error.message;return;}
- if(!rows||!rows.length){notice.textContent='No uploads found yet.';return;}
+ if(!rows.length){notice.textContent='No uploads found yet.';return;}
  for(const item of rows){
   const card=document.createElement('div');card.className='panel';card.style.marginBottom='12px';
   const title=document.createElement('strong');title.textContent=item.title||'Untitled media';
@@ -679,17 +694,16 @@ async function loadMyUploads(){
    coverLabel.append(coverInput);card.append(coverLabel,coverSave,coverStatus);
   }
   if(item.status==='pending'||item.status==='quarantined'){
-   const pendingNote=document.createElement('p');pendingNote.className='muted';pendingNote.textContent='This older upload was held by the previous approval workflow. You can publish it now or keep it private.';
+   const pendingNote=document.createElement('p');pendingNote.className='muted';pendingNote.textContent=item.status==='pending'?'This upload is awaiting safety review. It stays private until approved. You can preview it here.':'This upload is held for a safety review and is not public.';
    card.append(pendingNote);
   }
-  if(item.status!=='rejected'&&item.status!=='removed'){
+  if(item.status==='approved'){
    const visibilityLabel=document.createElement('label');visibilityLabel.textContent='Visibility: ';
    const visibilitySelect=document.createElement('select');visibilitySelect.innerHTML='<option value="private">Private</option><option value="public">Public</option><option value="unlisted">Unlisted</option>';visibilitySelect.value=item.visibility||'private';
    const saveVisibility=document.createElement('button');saveVisibility.className='btn secondary';saveVisibility.type='button';saveVisibility.textContent='Save visibility';
    saveVisibility.addEventListener('click',async()=>{
     saveVisibility.disabled=true;saveVisibility.textContent='Saving…';
-    const nextStatus=(item.status==='pending'||item.status==='quarantined')?'approved':item.status;
-    const {error:updateError}=await supabase.from('videos').update({visibility:visibilitySelect.value,status:nextStatus}).eq('id',item.id).eq('uploader_id',currentUser.id);
+    const {error:updateError}=await supabase.from('videos').update({visibility:visibilitySelect.value}).eq('id',item.id).eq('uploader_id',currentUser.id).eq('status','approved');
     if(updateError){notice.textContent='Could not update visibility: '+updateError.message;saveVisibility.disabled=false;saveVisibility.textContent='Save visibility';return;}
     notice.textContent=visibilitySelect.value==='public'?'Your video is now public.':'Visibility updated.';
     await loadMyUploads();
@@ -706,8 +720,16 @@ async function loadMyUploads(){
   }
   const {data:signed,error:signedError}=await supabase.storage.from('vexora-videos').createSignedUrl(item.storage_path,3600);
   if(!signedError&&signed?.signedUrl){
-   const link=document.createElement('a');link.href=signed.signedUrl;link.target='_blank';link.rel='noopener';link.textContent='View file (private link, expires in 1 hour)';card.append(link);
-  }else{const msg=document.createElement('p');msg.className='muted';msg.textContent='Private preview is temporarily unavailable.';card.append(msg);}
+   const path=(item.storage_path||'').toLowerCase();
+   const isAudio=/\\.(mp3|m4a|aac|wav|ogg|opus|flac)$/i.test(path);
+   const isVideo=/\\.(mp4|webm|mov|m4v|ogv)$/i.test(path);
+   let preview;
+   if(isVideo){preview=document.createElement('video');preview.controls=true;preview.playsInline=true;preview.preload='metadata';preview.style.cssText='display:block;width:100%;max-width:720px;max-height:420px;margin:12px 0;border-radius:12px;background:#111';}
+   else if(isAudio){preview=document.createElement('audio');preview.controls=true;preview.preload='metadata';preview.style.cssText='display:block;width:100%;margin:12px 0';}
+   else if(/\\.(jpg|jpeg|png|webp|gif|avif)$/i.test(path)){preview=document.createElement('img');preview.alt=item.title||'Uploaded image';preview.style.cssText='display:block;width:100%;max-width:420px;max-height:420px;object-fit:contain;margin:12px 0;border-radius:12px;background:#f3f4f6';}
+   if(preview){preview.src=signed.signedUrl;card.append(preview);}
+   const link=document.createElement('a');link.href=signed.signedUrl;link.target='_blank';link.rel='noopener';link.textContent='Open original file (secure link expires in 1 hour)';card.append(link);
+  }else{const msg=document.createElement('p');msg.className='muted';msg.textContent='Private preview is temporarily unavailable. '+(signedError?.message||'');card.append(msg);}
   list.append(card);
  }
  notice.textContent=rows.length+' upload(s) found. You control Public, Private, or Unlisted visibility. AI checks run in the background.';loadCreatorAnalytics();
