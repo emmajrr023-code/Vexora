@@ -8,6 +8,7 @@ on:
       - 'package.json'
       - 'capacitor.config.json'
       - 'www/**'
+      - 'beeba/**'
       - '.github/workflows/build-beeba-android.yml'
 
 permissions:
